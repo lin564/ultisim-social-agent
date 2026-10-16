@@ -73,7 +73,9 @@
         "Available to schools through UltiSim's 2024 collaboration with PowerSchool's ContentNav."
       ],
       "products": [],
-      "handles": {},
+      "handles": {
+        "facebook": "https://www.facebook.com/questsim/"
+      },
       "website": "https://questsim.com"
     },
     {
