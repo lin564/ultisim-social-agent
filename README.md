@@ -1,6 +1,6 @@
 # UltiSim Social Agent
 
-UltiSim's in-house social media manager. It keeps UltiSim, QuestSim, HealthSim AI, Richard Boyd and Linda Bernard visible as experts in their fields, and keeps them on the conference circuit. Claude does the research and writing, and a person approves everything before it goes out.
+UltiSim's in-house social media manager. It keeps UltiSim, QuestSim, HealthSimAI, Richard Boyd, Linda Bernard and Bob Kleinhample visible as experts in their fields, and keeps them on the conference circuit. Claude does the research and writing, and a person approves everything before it goes out.
 
 ## What it does
 
@@ -10,7 +10,7 @@ UltiSim's in-house social media manager. It keeps UltiSim, QuestSim, HealthSim A
 | `drafts` | Mon/Wed/Fri 6:30 | Writes a batch of posts across the content pillars for every platform that has credentials. Posts can react to fresh news, and each one includes a rationale and its sources. |
 | `publish` | Every 10 min | Publishes **approved** drafts that are due. It never publishes anything else. |
 | `mentions` | Every 2 h | Pulls mentions and comments from X, Facebook and Reddit, then triages them. It drafts a reply, ignores spam, or escalates to a person (complaints, press, sales leads). |
-| `conferences` | Mondays 5:00 | Finds conferences where Richard and Linda should present, with call-for-papers deadlines taken from the official sites. |
+| `conferences` | Mondays 5:00 | Finds conferences where Richard, Linda and Bob should present, with call-for-papers deadlines taken from the official sites. |
 | `reminders` | Daily 8:00 | Sends a Slack reminder 30, 14, 7, 3 and 1 days before each proposal deadline we haven't submitted to. Deadlines that pass are marked missed. |
 | `metrics` | Daily 4:00 | Snapshots engagement on recent posts where the platform's API exposes it (X, Facebook). |
 | `report` | Mondays 9:00 | Writes a weekly report: what went out, how it did, what to change, and where each call for papers stands. |
@@ -28,7 +28,7 @@ The dashboard (`/`) is where the team works:
 
 ## Setup
 
-1. **Fill in `config/brand.json`.** This matters more than any other step. Replace every `TODO` with descriptions, verified facts, products and handles for UltiSim, QuestSim, HealthSim AI, Richard and Linda. The agent's output is only as specific as this file. The file is re-read on every run, so you can edit it at any time.
+1. **Fill in `config/brand.json`.** This matters more than any other step. Replace every `TODO` with descriptions, verified facts, products and handles for UltiSim, QuestSim, HealthSimAI, Richard, Linda and Bob. The agent's output is only as specific as this file. The file is re-read on every run, so you can edit it at any time.
 2. `cp .env.example .env`, then set `ANTHROPIC_API_KEY`, `DASHBOARD_PASSWORD` and `SLACK_WEBHOOK_URL`.
 3. Add credentials for each platform you want (see below). Platforms without credentials are skipped. Drafting still works with no platform connected.
 4. `npm ci && npm start`, then open http://localhost:8787 (any username, your `DASHBOARD_PASSWORD`).

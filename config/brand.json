@@ -8,7 +8,8 @@
       "Lead with a concrete insight, number, or lesson learned.",
       "Credit partners, customers and co-presenters by name.",
       "Write like a practitioner talking to peers.",
-      "One clear call to action at most."
+      "One clear call to action at most.",
+      "Quote people only with the exact words in approved_quotes."
     ],
     "dont": [
       "Hype words: revolutionary, game-changing, disruptive, unlock, leverage.",
@@ -36,11 +37,6 @@
         {
           "name": "QuestSim",
           "description": "UltiSim's education platform: 3D adventure learning games for K-12 that run in the browser, including on Chromebooks.",
-          "url": "TODO"
-        },
-        {
-          "name": "HealthSim AI",
-          "description": "An AI-powered hospital operations digital twin. See the HealthSim AI entity.",
           "url": "TODO"
         },
         {
@@ -81,16 +77,53 @@
     {
       "id": "healthsim-ai",
       "type": "company",
-      "name": "HealthSim AI",
-      "description": "HealthSim AI is an AI-powered hospital operations digital twin. Hospital teams simulate patient flow, run what-if scenarios, and plan interventions by cost and ROI before trying them on the floor.",
+      "name": "HealthSimAI",
+      "description": "HealthSimAI brings digital twin, modeling, simulation and AI technology from the defense and mission-critical world to healthcare. It was established in September 2026 and is headquartered in Chapel Hill, North Carolina. Its Healthcare Decision Intelligence Platform, powered by a Living Healthcare Digital Twin, gives health systems a real-time, predictive view of hospital operations, so leaders can test what-if scenarios before changing anything on the floor.",
       "facts": [
-        "Part of UltiSim.",
-        "A digital twin of hospital operations built on discrete-event simulation.",
-        "Runs Monte Carlo what-if scenarios and compares interventions by cost and ROI.",
+        "Established in September 2026; headquartered in Chapel Hill, North Carolina.",
+        "CEO: Bob Kleinhample.",
+        "Launched the Healthcare Decision Intelligence Platform, powered by a Living Healthcare Digital Twin, in October 2026.",
+        "The platform integrates a hospital's physical environment, patient flows, staffing, resources, capacity and operational data.",
+        "Leaders use it to visualize current operations, simulate changes, and evaluate the likely impact of decisions before implementing them.",
+        "Targets patient flow and capacity, workforce and resource utilization, emergency department operations, operating room performance, facility planning and capital investment decisions.",
+        "Initial applications focus on hospital operations and patient flow, including emergency department operations, capacity, staffing and resource utilization.",
+        "Builds on decades of modeling, simulation and digital engineering for complex defense applications.",
+        "Its broader vision is 'Digital First Healthcare': living digital representations of health systems used to understand, predict, evaluate and continuously optimize operations.",
         "Never name hospitals, health systems or pilot sites."
       ],
-      "products": [],
-      "handles": {}
+      "products": [
+        {
+          "name": "Healthcare Decision Intelligence Platform",
+          "description": "Powered by a Living Healthcare Digital Twin: a living digital representation of a hospital for visualizing operations, simulating changes and testing what-if scenarios.",
+          "url": "https://www.healthsimai.com"
+        },
+        {
+          "name": "Healthcare Digital Twin Command Center",
+          "description": "Named in the launch announcement alongside the platform.",
+          "url": "https://www.healthsimai.com"
+        }
+      ],
+      "handles": {},
+      "website": "https://www.healthsimai.com",
+      "approved_quotes": [
+        {
+          "speaker": "Bob Kleinhample, CEO of HealthSimAI",
+          "quote": "Healthcare systems are making some of the most consequential operational decisions imaginable, often without the ability to see how those decisions will play out across the entire system. We are bringing proven digital twin and simulation capabilities from the defense and mission-critical world to healthcare so leaders can simulate, test, and optimize decisions before they impact patients, clinicians and operations."
+        }
+      ]
+    },
+    {
+      "id": "bob-kleinhample",
+      "type": "person",
+      "name": "Bob Kleinhample",
+      "title": "CEO, HealthSimAI",
+      "description": "Bob Kleinhample is CEO of HealthSimAI, which brings defense-grade digital twin and simulation technology to hospital operations.",
+      "facts": [
+        "CEO of HealthSimAI."
+      ],
+      "handles": {
+        "linkedin": "TODO"
+      }
     },
     {
       "id": "richard-boyd",
@@ -137,7 +170,7 @@
     {
       "id": "healthcare-sim",
       "weight": 2,
-      "description": "AI and simulation in healthcare education and clinical training (HealthSim AI)."
+      "description": "Digital twins and simulation for hospital operations: patient flow, capacity, staffing, ED and OR performance, and 'Digital First Healthcare' (HealthSimAI)."
     },
     {
       "id": "k12-learning",
@@ -147,7 +180,7 @@
     {
       "id": "product",
       "weight": 2,
-      "description": "Product stories for QuestSim, HealthSim AI, Ri Koh, TalkEngine/RolePlayED and Windcaller 3D."
+      "description": "Product stories for QuestSim, Ri Koh, TalkEngine/RolePlayED and Windcaller 3D, and for HealthSimAI's Healthcare Decision Intelligence Platform."
     },
     {
       "id": "shooting-education",
@@ -217,7 +250,8 @@
     ],
     "speakers": [
       "richard-boyd",
-      "linda-bernard"
+      "linda-bernard",
+      "bob-kleinhample"
     ],
     "regions": "Worldwide; prefer North America and Europe.",
     "remindDaysBefore": [
