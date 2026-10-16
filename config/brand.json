@@ -1,7 +1,7 @@
 {
   "_readme": "The agent's source of truth. It never states a fact about a company, product or person that is not in this file or in a source it found and cites. Replace every TODO before turning on the scheduler. Edit freely; it is re-read on every run.",
   "organization": "UltiSim",
-  "website": "TODO: https://...",
+  "website": "https://ultisim.com",
   "voice": {
     "summary": "Consummate professional: confident, specific, generous with expertise. We teach first and sell second.",
     "do": [
@@ -37,7 +37,7 @@
         {
           "name": "QuestSim",
           "description": "UltiSim's education platform: 3D adventure learning games for K-12 that run in the browser, including on Chromebooks.",
-          "url": "TODO"
+          "url": "https://questsim.com"
         },
         {
           "name": "Ri Koh",
@@ -59,7 +59,8 @@
         "linkedin": "https://www.linkedin.com/company/ultisim",
         "instagram": "TODO",
         "facebook": "TODO"
-      }
+      },
+      "website": "https://ultisim.com"
     },
     {
       "id": "questsim",
@@ -72,7 +73,8 @@
         "Available to schools through UltiSim's 2024 collaboration with PowerSchool's ContentNav."
       ],
       "products": [],
-      "handles": {}
+      "handles": {},
+      "website": "https://questsim.com"
     },
     {
       "id": "healthsim-ai",
