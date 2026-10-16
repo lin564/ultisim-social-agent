@@ -1,0 +1,111 @@
+{
+  "_readme": "The agent's source of truth. It never states a fact about a company, product or person that is not in this file or in a source it found and cites. Replace every TODO before turning on the scheduler. Edit freely; it is re-read on every run.",
+
+  "organization": "UltiSim",
+  "website": "TODO: https://...",
+
+  "voice": {
+    "summary": "Consummate professional: confident, specific, generous with expertise. We teach first and sell second.",
+    "do": [
+      "Lead with a concrete insight, number, or lesson learned.",
+      "Credit partners, customers and co-presenters by name.",
+      "Write like a practitioner talking to peers.",
+      "One clear call to action at most."
+    ],
+    "dont": [
+      "Hype words: revolutionary, game-changing, disruptive, unlock, leverage.",
+      "Claims about customers, contracts, outcomes or numbers that are not in this file or a cited source.",
+      "Politics, competitor bashing, or comment on tragedies or shootings in the news.",
+      "More than two hashtags on LinkedIn, more than one on X."
+    ]
+  },
+
+  "entities": [
+    {
+      "id": "ultisim",
+      "type": "company",
+      "name": "UltiSim",
+      "description": "TODO: one-paragraph description of UltiSim, what it builds and for whom.",
+      "facts": [
+        "TODO: verified facts the agent may repeat, one per line (founding year, notable programs, awards)."
+      ],
+      "products": [
+        {
+          "name": "Windcaller 3D",
+          "description": "A precision long-range rifle shooting simulator in the browser. It models G1 point-mass ballistics, air density, wind along the bullet's path, spin drift and Coriolis, on three F-Class ranges with distinct wind character, with an after-action review that replays the same wind.",
+          "url": "https://windcaller3d.com"
+        }
+      ],
+      "handles": { "x": "TODO", "linkedin": "TODO", "instagram": "TODO", "facebook": "TODO" }
+    },
+    {
+      "id": "questsim",
+      "type": "company",
+      "name": "QuestSim",
+      "description": "TODO",
+      "facts": [],
+      "products": [],
+      "handles": {}
+    },
+    {
+      "id": "healthsim-ai",
+      "type": "company",
+      "name": "HealthSim AI",
+      "description": "TODO",
+      "facts": [],
+      "products": [],
+      "handles": {}
+    },
+    {
+      "id": "richard-boyd",
+      "type": "person",
+      "name": "Richard Boyd",
+      "title": "TODO: title and company",
+      "description": "TODO: short bio. Public speaker bios describe him as a game-technology leader who founded 3Dsolve (acquired by Lockheed Martin) and led Virtual World Labs there. Confirm before relying on this.",
+      "facts": [],
+      "handles": { "x": "TODO", "linkedin": "TODO" }
+    },
+    {
+      "id": "linda-bernard",
+      "type": "person",
+      "name": "Linda Bernard",
+      "title": "TODO: title and company",
+      "description": "TODO: short bio.",
+      "facts": [],
+      "handles": { "linkedin": "TODO" }
+    }
+  ],
+
+  "pillars": [
+    { "id": "thought-leadership", "weight": 3, "description": "Simulation, serious games, synthetic training environments and AI in training: lessons, trends, opinions from Richard and Linda." },
+    { "id": "healthcare-sim", "weight": 2, "description": "AI and simulation in healthcare education and clinical training (HealthSim AI)." },
+    { "id": "product", "weight": 2, "description": "Product updates and stories for UltiSim, QuestSim and HealthSim AI products, including Windcaller 3D." },
+    { "id": "shooting-education", "weight": 2, "description": "Ballistics and wind-reading explainers drawn from Windcaller 3D's engine: mirage, wind along the path, spin drift, Coriolis, MOA vs MRAD. Educational and safety-minded." },
+    { "id": "news", "weight": 1, "description": "Reacting to news about the companies, the people, or their fields, with a point of view." },
+    { "id": "events", "weight": 1, "description": "Talks, panels, conference appearances and calls for papers." }
+  ],
+
+  "platforms": {
+    "x": { "maxChars": 280, "style": "One sharp idea. No thread unless asked." },
+    "linkedin": { "maxChars": 3000, "style": "Hook in the first two lines, short paragraphs, end with a question or a takeaway." },
+    "facebook": { "maxChars": 2000, "style": "Conversational, community-minded." },
+    "instagram": { "maxChars": 2200, "style": "Needs an image. Caption tells the story behind the image." },
+    "reddit": { "maxChars": 10000, "style": "Plain, useful, no marketing tone. Disclose affiliation. Follow each subreddit's self-promotion rules." },
+    "discord": { "maxChars": 2000, "style": "Community update tone." }
+  },
+
+  "conferences": {
+    "fields": [
+      "modeling, simulation and training (defense and industry)",
+      "healthcare simulation and medical education",
+      "AI in healthcare",
+      "serious games and game-based learning",
+      "XR, virtual worlds and spatial computing",
+      "shooting sports, firearms training and outdoor industry"
+    ],
+    "seed": ["I/ITSEC", "IMSH", "HIMSS", "GDC", "Serious Play", "AWE", "SHOT Show", "MODSIM World", "SimTecT", "ITEC", "AMEE", "INACSL"],
+    "speakers": ["richard-boyd", "linda-bernard"],
+    "regions": "Worldwide; prefer North America and Europe.",
+    "remindDaysBefore": [30, 14, 7, 3, 1]
+  }
+}

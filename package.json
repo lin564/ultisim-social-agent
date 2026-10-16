@@ -1,0 +1,18 @@
+{
+  "name": "ultisim-social-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UltiSim's social media manager: drafts posts, watches mentions, tracks conference calls for papers, and reports on performance. A person approves everything before it goes out.",
+  "type": "module",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning src/server.js",
+    "job": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning src/cli.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.135.0",
+    "node-cron": "4.6.0",
+    "zod": "4.6.7"
+  }
+}
