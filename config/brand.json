@@ -14,7 +14,8 @@
       "Hype words: revolutionary, game-changing, disruptive, unlock, leverage.",
       "Claims about customers, contracts, outcomes or numbers that are not in this file or a cited source.",
       "Politics, competitor bashing, or comment on tragedies or shootings in the news.",
-      "More than two hashtags on LinkedIn, more than one on X."
+      "More than two hashtags on LinkedIn, more than one on X.",
+      "Naming clients, partners, pilots, contracts or proposals unless they appear in this file."
     ]
   },
   "entities": [
@@ -28,7 +29,8 @@
         "Builds simulation learning experiences with game technology and AI.",
         "Serves education, healthcare, defense and energy, among other sectors.",
         "In August 2024 UltiSim announced a collaboration with PowerSchool to bring its simulated learning experiences to K-12 classrooms through PowerSchool's ContentNav repository.",
-        "Co-produced the web-based 3D game 'In the Footsteps of Matthew Henson', about the Arctic explorer, with In the Footsteps of History (2024)."
+        "Co-produced the web-based 3D game 'In the Footsteps of Matthew Henson', about the Arctic explorer, with In the Footsteps of History (2024).",
+        "Works in digital twins, simulation learning and AI in education."
       ],
       "products": [
         {
@@ -38,8 +40,17 @@
         },
         {
           "name": "HealthSim AI",
-          "description": "See the HealthSim AI entity.",
+          "description": "An AI-powered hospital operations digital twin. See the HealthSim AI entity.",
           "url": "TODO"
+        },
+        {
+          "name": "Ri Koh",
+          "description": "An enterprise AI solution for small federal contractor companies.",
+          "url": "TODO"
+        },
+        {
+          "name": "TalkEngine and RolePlayED",
+          "description": "Interactive conversations with AI-driven virtual characters that show body language and emotion, so learners can practice communication skills and get personalized feedback. The characters adapt to each learner's responses and emotional state, and learning records are tracked."
         },
         {
           "name": "Windcaller 3D",
@@ -71,8 +82,13 @@
       "id": "healthsim-ai",
       "type": "company",
       "name": "HealthSim AI",
-      "description": "TODO: public one-paragraph description of HealthSim AI. Nothing about it is published online yet.",
-      "facts": [],
+      "description": "HealthSim AI is an AI-powered hospital operations digital twin. Hospital teams simulate patient flow, run what-if scenarios, and plan interventions by cost and ROI before trying them on the floor.",
+      "facts": [
+        "Part of UltiSim.",
+        "A digital twin of hospital operations built on discrete-event simulation.",
+        "Runs Monte Carlo what-if scenarios and compares interventions by cost and ROI.",
+        "Never name hospitals, health systems or pilot sites."
+      ],
       "products": [],
       "handles": {}
     },
@@ -80,13 +96,13 @@
       "id": "richard-boyd",
       "type": "person",
       "name": "Richard Boyd",
-      "title": "Co-founder and CEO, UltiSim",
-      "description": "Richard Boyd co-founded UltiSim in Chapel Hill, North Carolina, and has spent his career building companies at the meeting point of game technology, simulation and AI. He co-founded 3Dsolve, which Lockheed Martin acquired in 2007, and then led Lockheed Martin's Virtual World Labs. He is also co-founder and CEO of Tanjo, which builds platforms for people and machines to work together. He speaks widely on what he calls the 'Simulation Century'.",
+      "title": "Co-founder and Chairman, UltiSim",
+      "description": "Richard Boyd co-founded UltiSim in Chapel Hill, North Carolina, and has spent his career building companies at the meeting point of game technology, simulation and AI. He co-founded 3Dsolve, which Lockheed Martin acquired in 2007, and then led Lockheed Martin's Virtual World Labs. He also co-founded Tanjo, which builds platforms for people and machines to work together. He speaks widely on what he calls the 'Simulation Century'.",
       "facts": [
-        "Co-founder and CEO of UltiSim.",
+        "Co-founder and Chairman of UltiSim.",
         "Co-founded 3Dsolve, acquired by Lockheed Martin in 2007.",
         "Led Virtual World Labs at Lockheed Martin after the acquisition.",
-        "Co-founder and CEO of Tanjo.",
+        "Co-founder of Tanjo.",
         "Keynote speaker on AI and simulation; frames this era as the 'Simulation Century'."
       ],
       "handles": {
@@ -116,7 +132,7 @@
     {
       "id": "thought-leadership",
       "weight": 3,
-      "description": "Simulation, serious games, synthetic training environments and AI in training: lessons, trends, opinions from Richard and Linda."
+      "description": "Digital twins, simulation learning, AI in education, serious games and synthetic training environments: lessons, trends and opinions from Richard and Linda."
     },
     {
       "id": "healthcare-sim",
@@ -131,7 +147,7 @@
     {
       "id": "product",
       "weight": 2,
-      "description": "Product updates and stories for UltiSim, QuestSim and HealthSim AI products, including Windcaller 3D."
+      "description": "Product stories for QuestSim, HealthSim AI, Ri Koh, TalkEngine/RolePlayED and Windcaller 3D."
     },
     {
       "id": "shooting-education",
@@ -182,7 +198,8 @@
       "AI in healthcare",
       "serious games and game-based learning",
       "XR, virtual worlds and spatial computing",
-      "shooting sports, firearms training and outdoor industry"
+      "shooting sports, firearms training and outdoor industry",
+      "government contracting and AI for small businesses"
     ],
     "seed": [
       "I/ITSEC",
