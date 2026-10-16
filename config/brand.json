@@ -1,9 +1,7 @@
 {
   "_readme": "The agent's source of truth. It never states a fact about a company, product or person that is not in this file or in a source it found and cites. Replace every TODO before turning on the scheduler. Edit freely; it is re-read on every run.",
-
   "organization": "UltiSim",
   "website": "TODO: https://...",
-
   "voice": {
     "summary": "Consummate professional: confident, specific, generous with expertise. We teach first and sell second.",
     "do": [
@@ -19,31 +17,53 @@
       "More than two hashtags on LinkedIn, more than one on X."
     ]
   },
-
   "entities": [
     {
       "id": "ultisim",
       "type": "company",
       "name": "UltiSim",
-      "description": "TODO: one-paragraph description of UltiSim, what it builds and for whom.",
+      "description": "UltiSim is a Chapel Hill, North Carolina company that builds simulations and learning experiences with game technology and AI, for education, healthcare, defense, energy and industry.",
       "facts": [
-        "TODO: verified facts the agent may repeat, one per line (founding year, notable programs, awards)."
+        "Based in Chapel Hill, North Carolina.",
+        "Builds simulation learning experiences with game technology and AI.",
+        "Serves education, healthcare, defense and energy, among other sectors.",
+        "In August 2024 UltiSim announced a collaboration with PowerSchool to bring its simulated learning experiences to K-12 classrooms through PowerSchool's ContentNav repository.",
+        "Co-produced the web-based 3D game 'In the Footsteps of Matthew Henson', about the Arctic explorer, with In the Footsteps of History (2024)."
       ],
       "products": [
+        {
+          "name": "QuestSim",
+          "description": "UltiSim's education platform: 3D adventure learning games for K-12 that run in the browser, including on Chromebooks.",
+          "url": "TODO"
+        },
+        {
+          "name": "HealthSim AI",
+          "description": "See the HealthSim AI entity.",
+          "url": "TODO"
+        },
         {
           "name": "Windcaller 3D",
           "description": "A precision long-range rifle shooting simulator in the browser. It models G1 point-mass ballistics, air density, wind along the bullet's path, spin drift and Coriolis, on three F-Class ranges with distinct wind character, with an after-action review that replays the same wind.",
           "url": "https://windcaller3d.com"
         }
       ],
-      "handles": { "x": "TODO", "linkedin": "TODO", "instagram": "TODO", "facebook": "TODO" }
+      "handles": {
+        "x": "TODO",
+        "linkedin": "https://www.linkedin.com/company/ultisim",
+        "instagram": "TODO",
+        "facebook": "TODO"
+      }
     },
     {
       "id": "questsim",
       "type": "company",
       "name": "QuestSim",
-      "description": "TODO",
-      "facts": [],
+      "description": "QuestSim is UltiSim's K-12 education platform: 3D adventure learning games that students play in the browser, including on Chromebooks. Linda Bernard leads the initiative.",
+      "facts": [
+        "Part of UltiSim; led by Linda Bernard.",
+        "3D adventure learning games for K-12, accessible on Chromebooks.",
+        "Available to schools through UltiSim's 2024 collaboration with PowerSchool's ContentNav."
+      ],
       "products": [],
       "handles": {}
     },
@@ -51,7 +71,7 @@
       "id": "healthsim-ai",
       "type": "company",
       "name": "HealthSim AI",
-      "description": "TODO",
+      "description": "TODO: public one-paragraph description of HealthSim AI. Nothing about it is published online yet.",
       "facts": [],
       "products": [],
       "handles": {}
@@ -60,40 +80,101 @@
       "id": "richard-boyd",
       "type": "person",
       "name": "Richard Boyd",
-      "title": "TODO: title and company",
-      "description": "TODO: short bio. Public speaker bios describe him as a game-technology leader who founded 3Dsolve (acquired by Lockheed Martin) and led Virtual World Labs there. Confirm before relying on this.",
-      "facts": [],
-      "handles": { "x": "TODO", "linkedin": "TODO" }
+      "title": "Co-founder and CEO, UltiSim",
+      "description": "Richard Boyd co-founded UltiSim in Chapel Hill, North Carolina, and has spent his career building companies at the meeting point of game technology, simulation and AI. He co-founded 3Dsolve, which Lockheed Martin acquired in 2007, and then led Lockheed Martin's Virtual World Labs. He is also co-founder and CEO of Tanjo, which builds platforms for people and machines to work together. He speaks widely on what he calls the 'Simulation Century'.",
+      "facts": [
+        "Co-founder and CEO of UltiSim.",
+        "Co-founded 3Dsolve, acquired by Lockheed Martin in 2007.",
+        "Led Virtual World Labs at Lockheed Martin after the acquisition.",
+        "Co-founder and CEO of Tanjo.",
+        "Keynote speaker on AI and simulation; frames this era as the 'Simulation Century'."
+      ],
+      "handles": {
+        "x": "TODO",
+        "linkedin": "TODO"
+      }
     },
     {
       "id": "linda-bernard",
       "type": "person",
       "name": "Linda Bernard",
-      "title": "TODO: title and company",
-      "description": "TODO: short bio.",
-      "facts": [],
-      "handles": { "linkedin": "TODO" }
+      "title": "COO and Chief Learning Officer, UltiSim",
+      "description": "Linda Bernard is COO and Chief Learning Officer at UltiSim, where she leads the QuestSim 3D adventure games initiative for K-12 education. She brings more than twenty years of experience in teaching, school administration and education technology, and hosts the podcast 'Education in the Simulation Century', interviewing educators, researchers, entrepreneurs and thought leaders about new approaches to learning.",
+      "facts": [
+        "COO and Chief Learning Officer at UltiSim.",
+        "Leads QuestSim, UltiSim's K-12 3D adventure games initiative.",
+        "More than twenty years in teaching, school administration and education technology.",
+        "Hosts the podcast 'Education in the Simulation Century'.",
+        "Listed as a speaker at ITEC."
+      ],
+      "handles": {
+        "linkedin": "TODO"
+      }
     }
   ],
-
   "pillars": [
-    { "id": "thought-leadership", "weight": 3, "description": "Simulation, serious games, synthetic training environments and AI in training: lessons, trends, opinions from Richard and Linda." },
-    { "id": "healthcare-sim", "weight": 2, "description": "AI and simulation in healthcare education and clinical training (HealthSim AI)." },
-    { "id": "product", "weight": 2, "description": "Product updates and stories for UltiSim, QuestSim and HealthSim AI products, including Windcaller 3D." },
-    { "id": "shooting-education", "weight": 2, "description": "Ballistics and wind-reading explainers drawn from Windcaller 3D's engine: mirage, wind along the path, spin drift, Coriolis, MOA vs MRAD. Educational and safety-minded." },
-    { "id": "news", "weight": 1, "description": "Reacting to news about the companies, the people, or their fields, with a point of view." },
-    { "id": "events", "weight": 1, "description": "Talks, panels, conference appearances and calls for papers." }
+    {
+      "id": "thought-leadership",
+      "weight": 3,
+      "description": "Simulation, serious games, synthetic training environments and AI in training: lessons, trends, opinions from Richard and Linda."
+    },
+    {
+      "id": "healthcare-sim",
+      "weight": 2,
+      "description": "AI and simulation in healthcare education and clinical training (HealthSim AI)."
+    },
+    {
+      "id": "k12-learning",
+      "weight": 2,
+      "description": "Game-based and simulation learning in K-12 (QuestSim), and Linda's podcast conversations on education in the Simulation Century."
+    },
+    {
+      "id": "product",
+      "weight": 2,
+      "description": "Product updates and stories for UltiSim, QuestSim and HealthSim AI products, including Windcaller 3D."
+    },
+    {
+      "id": "shooting-education",
+      "weight": 2,
+      "description": "Ballistics and wind-reading explainers drawn from Windcaller 3D's engine: mirage, wind along the path, spin drift, Coriolis, MOA vs MRAD. Educational and safety-minded."
+    },
+    {
+      "id": "news",
+      "weight": 1,
+      "description": "Reacting to news about the companies, the people, or their fields, with a point of view."
+    },
+    {
+      "id": "events",
+      "weight": 1,
+      "description": "Talks, panels, conference appearances and calls for papers."
+    }
   ],
-
   "platforms": {
-    "x": { "maxChars": 280, "style": "One sharp idea. No thread unless asked." },
-    "linkedin": { "maxChars": 3000, "style": "Hook in the first two lines, short paragraphs, end with a question or a takeaway." },
-    "facebook": { "maxChars": 2000, "style": "Conversational, community-minded." },
-    "instagram": { "maxChars": 2200, "style": "Needs an image. Caption tells the story behind the image." },
-    "reddit": { "maxChars": 10000, "style": "Plain, useful, no marketing tone. Disclose affiliation. Follow each subreddit's self-promotion rules." },
-    "discord": { "maxChars": 2000, "style": "Community update tone." }
+    "x": {
+      "maxChars": 280,
+      "style": "One sharp idea. No thread unless asked."
+    },
+    "linkedin": {
+      "maxChars": 3000,
+      "style": "Hook in the first two lines, short paragraphs, end with a question or a takeaway."
+    },
+    "facebook": {
+      "maxChars": 2000,
+      "style": "Conversational, community-minded."
+    },
+    "instagram": {
+      "maxChars": 2200,
+      "style": "Needs an image. Caption tells the story behind the image."
+    },
+    "reddit": {
+      "maxChars": 10000,
+      "style": "Plain, useful, no marketing tone. Disclose affiliation. Follow each subreddit's self-promotion rules."
+    },
+    "discord": {
+      "maxChars": 2000,
+      "style": "Community update tone."
+    }
   },
-
   "conferences": {
     "fields": [
       "modeling, simulation and training (defense and industry)",
@@ -103,9 +184,31 @@
       "XR, virtual worlds and spatial computing",
       "shooting sports, firearms training and outdoor industry"
     ],
-    "seed": ["I/ITSEC", "IMSH", "HIMSS", "GDC", "Serious Play", "AWE", "SHOT Show", "MODSIM World", "SimTecT", "ITEC", "AMEE", "INACSL"],
-    "speakers": ["richard-boyd", "linda-bernard"],
+    "seed": [
+      "I/ITSEC",
+      "IMSH",
+      "HIMSS",
+      "GDC",
+      "Serious Play",
+      "AWE",
+      "SHOT Show",
+      "MODSIM World",
+      "SimTecT",
+      "ITEC",
+      "AMEE",
+      "INACSL"
+    ],
+    "speakers": [
+      "richard-boyd",
+      "linda-bernard"
+    ],
     "regions": "Worldwide; prefer North America and Europe.",
-    "remindDaysBefore": [30, 14, 7, 3, 1]
+    "remindDaysBefore": [
+      30,
+      14,
+      7,
+      3,
+      1
+    ]
   }
 }
