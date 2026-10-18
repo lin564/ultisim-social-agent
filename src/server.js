@@ -60,6 +60,7 @@ export function createApp(db) {
       res.writeHead(status, { "Content-Type": type, "Cache-Control": "no-store" });
       res.end(type === "application/json" ? JSON.stringify(body) : body);
     };
+    if (req.url === "/healthz") return send(200, { ok: true });
     if (!authorized(req)) {
       res.writeHead(401, { "WWW-Authenticate": 'Basic realm="social-agent"' });
       return res.end();

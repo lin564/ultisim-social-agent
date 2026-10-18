@@ -1,0 +1,39 @@
+# Render Blueprint: New > Blueprint in the Render dashboard, then pick this repository.
+# Values marked "sync: false" are secrets Render asks for on the first deploy; set the rest later
+# under the service's Environment tab as platforms get connected.
+services:
+  - type: web
+    name: ultisim-social-agent
+    runtime: node
+    plan: starter            # a paid plan: the database needs a persistent disk
+    region: virginia
+    branch: main
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DB_PATH
+        value: /var/data/social-agent.db
+      - key: SCHEDULE_TZ
+        value: America/New_York
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: DASHBOARD_PASSWORD
+        sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+      # Facebook: the UltiSim page, then the QuestSim page.
+      - key: META_PAGE_ID
+        sync: false
+      - key: META_PAGE_ACCESS_TOKEN
+        sync: false
+      - key: META_PAGE_ID_QUESTSIM
+        sync: false
+      - key: META_PAGE_ACCESS_TOKEN_QUESTSIM
+        sync: false

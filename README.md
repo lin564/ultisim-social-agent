@@ -39,7 +39,11 @@ Tests: `npm test`. Needs Node 22.13 or later; the database is the built-in `node
 
 ### Platform credentials
 
-Credentials for the company account use the plain variable names. For Richard's or Linda's own accounts, add their entity id to the name, for example `LINKEDIN_ACCESS_TOKEN_RICHARD_BOYD` and `LINKEDIN_AUTHOR_RICHARD_BOYD=urn:li:person:...`. Drafts written in their voice are then published from their accounts.
+Credentials for UltiSim's own accounts use the plain variable names. For any other account in `brand.json`, add its entity id to the name, for example:
+- QuestSim's Facebook Page: `META_PAGE_ID_QUESTSIM` and `META_PAGE_ACCESS_TOKEN_QUESTSIM`.
+- Richard's LinkedIn: `LINKEDIN_ACCESS_TOKEN_RICHARD_BOYD` and `LINKEDIN_AUTHOR_RICHARD_BOYD=urn:li:person:...`.
+
+The agent drafts only for accounts that have credentials, and checks mentions on each of them.
 
 | Platform | You need | Notes |
 |---|---|---|
@@ -53,9 +57,9 @@ Tokens expire: X and LinkedIn tokens need refreshing, and Meta Page tokens shoul
 
 ## Deploying
 
-A single small always-on process with a persistent disk for the SQLite file. With the included `Dockerfile`, any container host works (Fly.io, Render, Railway, a VM): mount a volume at `/data` and set the variables from `.env.example` as secrets. To run jobs from an external scheduler instead, set `SCHEDULER=off` and call `npm run job -- <name>`.
+It runs on [Render](https://render.com) from `render.yaml`: one web service on the Starter plan with a 1 GB disk for the SQLite file. Render serves it over HTTPS and checks `/healthz`. **[docs/SETUP.md](docs/SETUP.md)** walks through going live step by step: the Claude API key, the Slack webhook, the Facebook Page tokens and the Render deploy.
 
-Put the dashboard behind HTTPS, because it uses Basic auth.
+Any other host works too, using the `Dockerfile`: mount a volume at `/data` and set the variables from `.env.example` as secrets. To run jobs from an external scheduler instead, set `SCHEDULER=off` and call `npm run job -- <name>`. Keep the dashboard behind HTTPS, because it uses Basic auth.
 
 ## Costs
 

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ask } from "../claude.js";
 import { loadBrand, systemPrompt } from "../brand.js";
 import { json } from "../db.js";
-import { platforms, PLATFORM_NAMES } from "../platforms/index.js";
+import { PLATFORM_NAMES, connectedAccounts } from "../platforms/index.js";
 import { notify, dashboardLink } from "../notify.js";
 
 const DraftSchema = z.object({
@@ -20,13 +20,16 @@ const DraftSchema = z.object({
 });
 
 /**
- * Writes a batch of drafts for review. Platforms default to the ones with credentials,
- * so drafts land where they can actually be published.
+ * Writes a batch of drafts for review, for the accounts that have credentials so drafts land
+ * where they can actually be published. With nothing connected yet, it drafts for LinkedIn and X
+ * for the team to post by hand.
  */
-export async function draftPosts(db, { count = 6, platformsWanted } = {}) {
+export async function draftPosts(db, { count = 6 } = {}) {
   const brand = loadBrand();
-  const live = PLATFORM_NAMES.filter((p) => platforms[p].configured("ultisim"));
-  const targets = platformsWanted ?? (live.length ? live : ["linkedin", "x"]);
+  const live = connectedAccounts(brand);
+  const targets = live.length
+    ? live.map((a) => `${a.platform} as ${a.account}`).join(", ")
+    : "linkedin and x, from any account in the brand profile (nothing is connected yet; the team posts these by hand)";
   const today = new Date().toISOString().slice(0, 10);
 
   const news = db.prepare("SELECT id, url, title, summary, entity_ids FROM news WHERE used = 0 ORDER BY id DESC LIMIT 15").all();
@@ -38,7 +41,7 @@ export async function draftPosts(db, { count = 6, platformsWanted } = {}) {
     webSearch: 3,
     effort: "high",
     schema: DraftSchema,
-    prompt: `Today is ${today}. Write ${count} social posts for review, spread across these platforms: ${targets.join(", ")}.
+    prompt: `Today is ${today}. Write ${count} social posts for review, spread across these platform/account pairs and no others: ${targets}.
 
 Balance the content pillars by their weights, and don't repeat the angles of recent posts. Make each post something a peer would save or share: a specific lesson, a clear opinion, a useful explainer. Posts from a person's account are written in that person's first-person voice and are only for people listed in the brand profile. Respect each platform's maxChars and style.
 
@@ -62,6 +65,6 @@ ${JSON.stringify(recent.map((r) => ({ ...r, text: r.text.slice(0, 200) })))}`,
   const markUsed = db.prepare("UPDATE news SET used = 1 WHERE id = ?");
   for (const n of news) if (usedUrls.has(n.url)) markUsed.run(n.id);
 
-  if (drafts.length) await notify(`${drafts.length} new post drafts are waiting for review. ${dashboardLink("#drafts")}`);
+  if (drafts.length) await notify(`${drafts.length} new post draft${drafts.length === 1 ? " is" : "s are"} waiting for review. ${dashboardLink("#drafts")}`);
   return { drafted: drafts.length };
 }

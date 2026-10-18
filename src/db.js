@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS drafts (
 CREATE TABLE IF NOT EXISTS mentions (
   id INTEGER PRIMARY KEY,
   platform TEXT NOT NULL,
+  account TEXT NOT NULL DEFAULT 'ultisim',    -- whose account was mentioned
   external_id TEXT NOT NULL,
   author TEXT,
   text TEXT NOT NULL,

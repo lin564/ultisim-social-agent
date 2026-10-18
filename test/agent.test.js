@@ -4,6 +4,8 @@ import { openDb } from "../src/db.js";
 import { remindDeadlines, daysUntil } from "../src/jobs/conferences.js";
 import { publishDue } from "../src/jobs/publish.js";
 import { createApp } from "../src/server.js";
+import { connectedAccounts } from "../src/platforms/index.js";
+import { loadBrand } from "../src/brand.js";
 
 delete process.env.SLACK_WEBHOOK_URL;
 
@@ -93,6 +95,30 @@ test("dashboard requires the password and edits drafts", async () => {
 
     const state = await (await fetch(`${base}/api/state`, { headers: auth })).json();
     assert.equal(state.drafts.length, 1);
+  } finally {
+    server.close();
+  }
+});
+
+test("each Facebook page with its own credentials counts as a connected account", () => {
+  process.env.META_PAGE_ACCESS_TOKEN = "t1";
+  process.env.META_PAGE_ID = "1";
+  process.env.META_PAGE_ACCESS_TOKEN_QUESTSIM = "t2";
+  process.env.META_PAGE_ID_QUESTSIM = "2";
+  try {
+    const fb = connectedAccounts(loadBrand()).filter((a) => a.platform === "facebook").map((a) => a.account);
+    assert.deepEqual(fb, ["ultisim", "questsim"]);
+  } finally {
+    for (const k of ["META_PAGE_ACCESS_TOKEN", "META_PAGE_ID", "META_PAGE_ACCESS_TOKEN_QUESTSIM", "META_PAGE_ID_QUESTSIM"]) delete process.env[k];
+  }
+});
+
+test("the health check answers without the dashboard password", async () => {
+  process.env.DASHBOARD_PASSWORD = "s3cret";
+  const server = createApp(openDb(":memory:")).listen(0);
+  try {
+    const res = await fetch(`http://localhost:${server.address().port}/healthz`);
+    assert.equal(res.status, 200);
   } finally {
     server.close();
   }
