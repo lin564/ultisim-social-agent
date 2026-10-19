@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social Desk</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --ink: #1b1f24; --muted: #5b6573; --line: #dde1e6;
+    --accent: #1f5fbf; --ok: #1e7b4a; --warn: #a65e00; --bad: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111418; --panel: #1a1e24; --ink: #e8ebef; --muted: #9aa4b1; --line: #2c323a;
+      --accent: #6ea2ff; --ok: #4cc38a; --warn: #f0a640; --bad: #ff7a6e; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; }
+  header { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 1; }
+  header h1 { font-size: 17px; margin: 0 8px 0 0; }
+  nav a { color: var(--muted); text-decoration: none; margin-right: 14px; font-weight: 500; white-space: nowrap; display: inline-block; }
+  nav a.on { color: var(--accent); }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .meta { color: var(--muted); font-size: 13px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .pill { border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; font-size: 12px; }
+  .pending { color: var(--warn); } .approved, .published, .accepted, .submitted { color: var(--ok); } .failed, .rejected, .missed { color: var(--bad); }
+  textarea, input, select { width: 100%; font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+  textarea { min-height: 110px; resize: vertical; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .row > * { flex: 1 1 160px; }
+  button { font: inherit; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .count { font-size: 12px; color: var(--muted); text-align: right; }
+  .count.over { color: var(--bad); font-weight: 600; }
+  details { margin-top: 6px; } summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  pre { white-space: pre-wrap; font: inherit; margin: 6px 0 0; }
+  .empty { color: var(--muted); padding: 24px 0; text-align: center; }
+  .filters { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filters button.on { border-color: var(--accent); color: var(--accent); }
+  .due-soon { color: var(--bad); font-weight: 600; }
+  a { color: var(--accent); overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Social Desk</h1>
+  <nav>
+    <a href="#drafts">Drafts</a><a href="#conferences">Conferences</a><a href="#mentions">Escalations</a><a href="#reports">Reports</a><a href="#system">System</a>
+  </nav>
+</header>
+<main id="view"></main>
+
+<script>
+const LIMITS = { x: 280, linkedin: 3000, facebook: 2000, instagram: 2200, reddit: 10000, discord: 2000 };
+let data = null;
+let draftFilter = "pending";
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const link = (u, label) => u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(label ?? u)}</a>` : "";
+
+async function api(path, body) {
+  const res = await fetch(path, body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(out.error ?? res.statusText);
+  return out;
+}
+async function refresh() { data = await api("/api/state"); render(); }
+
+function daysLeft(date) {
+  if (!date) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.round((new Date(date + "T00:00:00") - today) / 86400000);
+}
+
+function draftCard(d) {
+  const editable = d.status === "pending" || d.status === "failed";
+  return `<div class="card" data-id="${d.id}">
+    <div class="meta">
+      <span class="pill">${esc(d.platform)}</span><span>${esc(d.account)}</span>
+      ${d.kind === "reply" ? '<span class="pill">reply</span>' : ""}
+      ${d.pillar ? `<span>${esc(d.pillar)}</span>` : ""}
+      <span class="${d.status}">${d.status}</span>
+      ${d.scheduled_for ? `<span>scheduled ${esc(d.scheduled_for)} UTC</span>` : ""}
+      ${d.external_url ? link(d.external_url, "view post") : ""}
+    </div>
+    ${d.platform === "reddit" && d.kind === "post" ? `<div class="row"><input data-f="target" placeholder="subreddit" value="${esc(d.target)}" ${editable ? "" : "disabled"}><input data-f="title" placeholder="title" value="${esc(d.title)}" ${editable ? "" : "disabled"}></div>` : ""}
+    <div class="row"><textarea data-f="text" ${editable ? "" : "disabled"}>${esc(d.text)}</textarea></div>
+    <div class="count" data-count></div>
+    ${editable && d.kind === "post" ? `<div class="row">
+      <input data-f="image_url" placeholder="Image URL${d.platform === "instagram" ? " (required)" : " (optional)"}" value="${esc(d.image_url)}">
+      <input data-f="scheduled_for" type="datetime-local" title="Publish time, your local time. Empty publishes at the next check." value="${d.scheduled_for ? esc(toLocalInput(d.scheduled_for)) : ""}">
+    </div>` : ""}
+    <details><summary>Why this post${d.sources.length ? ` · ${d.sources.length} source(s)` : ""}</summary>
+      <pre>${esc(d.rationale)}</pre>${d.sources.map((s) => `<div>${link(s)}</div>`).join("")}
+    </details>
+    ${d.error ? `<div class="failed" style="margin-top:6px">${esc(d.error)}</div>` : ""}
+    <div class="row" style="flex:none;justify-content:flex-end">
+      ${editable ? `<button data-a="reject">Reject</button><button data-a="save">Save</button><button data-a="approve" class="primary">Approve</button><button data-a="publish">Publish now</button>` : ""}
+      ${d.status === "approved" ? `<button data-a="reopen">Back to review</button><button data-a="publish">Publish now</button>` : ""}
+    </div>
+  </div>`;
+}
+
+function toLocalInput(utc) {
+  const dt = new Date(utc.replace(" ", "T") + "Z");
+  return new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+function toUtcSql(local) {
+  return local ? new Date(local).toISOString().slice(0, 19).replace("T", " ") : null;
+}
+
+function renderDrafts() {
+  const groups = ["pending", "approved", "failed", "published"];
+  const shown = data.drafts.filter((d) => d.status === draftFilter);
+  return `<div class="filters">${groups.map((g) => `<button data-filter="${g}" class="${g === draftFilter ? "on" : ""}">${g} (${data.drafts.filter((d) => d.status === g).length})</button>`).join("")}
+    <span style="flex:1"></span><button data-job="drafts">Draft new posts</button></div>
+    ${shown.map(draftCard).join("") || `<div class="empty">Nothing ${draftFilter}.</div>`}`;
+}
+
+function renderConferences() {
+  const statuses = ["watching", "applying", "submitted", "accepted", "declined", "skipped", "missed"];
+  const rows = data.conferences.map((c) => {
+    const left = daysLeft(c.cfp_deadline);
+    const due = c.cfp_deadline ? `<span class="${left !== null && left <= 14 && ["watching", "applying"].includes(c.status) ? "due-soon" : ""}">proposals due ${esc(c.cfp_deadline)}${left >= 0 ? ` (${left}d)` : ""}</span>` : "<span>deadline not announced</span>";
+    return `<div class="card" data-conf="${c.id}">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <strong>${esc(c.name)} ${esc(c.edition)}</strong>
+        <select data-cf="status" style="width:auto">${statuses.map((s) => `<option ${s === c.status ? "selected" : ""}>${s}</option>`).join("")}</select>
+      </div>
+      <div class="meta">${due}${c.event_start ? `<span>event ${esc(c.event_start)}${c.event_end ? "–" + esc(c.event_end) : ""}</span>` : ""}<span>${esc(c.location)}</span>${link(c.cfp_url, "call for papers")}${link(c.url, "site")}</div>
+      <p style="margin:8px 0">${esc(c.fit)}</p>
+      <div class="meta">Speakers: ${esc(c.speakers.join(", ") || "—")}</div>
+      <details ${c.abstract ? "" : ""}><summary>${c.abstract ? "Draft proposal" : "Notes"}</summary>
+        ${c.abstract ? `<textarea data-cf="abstract" style="min-height:260px">${esc(c.abstract)}</textarea>` : ""}
+        <textarea data-cf="notes" placeholder="Notes">${esc(c.notes)}</textarea>
+        <div class="row" style="flex:none;justify-content:flex-end"><button data-ca="save">Save</button></div>
+      </details>
+      <div class="row" style="flex:none;justify-content:flex-end">
+        <input data-angle placeholder="Optional angle for the proposal" style="flex:1 1 240px">
+        <button data-ca="abstract">${c.abstract ? "Redraft proposal" : "Draft proposal"}</button>
+      </div>
+    </div>`;
+  }).join("");
+  return `<div class="filters"><span style="flex:1"></span><button data-job="conferences">Search for conferences</button><button data-job="reminders">Send deadline reminders</button></div>
+    <details class="card"><summary>Add a conference by hand</summary>
+      <form id="addconf" class="row"><input name="name" placeholder="Name" required><input name="edition" placeholder="Year" required><input name="cfp_url" placeholder="Call for papers URL"><input name="cfp_deadline" type="date"><button class="primary">Add</button></form>
+    </details>
+    ${rows || '<div class="empty">No conferences yet. Run a search.</div>'}`;
+}
+
+function renderMentions() {
+  return `<div class="filters"><span style="flex:1"></span><button data-job="mentions">Check mentions now</button></div>` +
+    (data.escalations.map((m) => `<div class="card"><div class="meta"><span class="pill">${esc(m.platform)}</span><span>@${esc(m.author)}</span><span>${esc(m.found_at)}</span>${link(m.url, "open")}</div><pre>${esc(m.text)}</pre></div>`).join("")
+    || '<div class="empty">Nothing needs a person right now. Reply drafts appear under Drafts.</div>');
+}
+
+function renderReports() {
+  return `<div class="filters"><span style="flex:1"></span><button data-job="metrics">Refresh metrics</button><button data-job="report">Write report now</button></div>` +
+    (data.reports.map((r) => `<div class="card"><div class="meta">${esc(r.period_start)} to ${esc(r.period_end)}</div><pre>${esc(r.body.replace(/\*/g, ""))}</pre></div>`).join("")
+    || '<div class="empty">No reports yet. The first one arrives on Monday.</div>');
+}
+
+function renderSystem() {
+  const p = Object.entries(data.platforms).map(([n, ok]) => `<span class="pill ${ok ? "approved" : "failed"}">${n}: ${ok ? "connected" : "no credentials"}</span>`).join(" ");
+  return `<div class="card"><strong>Platforms (company account)</strong><div class="meta" style="margin-top:6px">${p}</div></div>
+    <div class="card"><strong>Run a job</strong><div class="row">${data.jobs.map((j) => `<button data-job="${j}">${j}</button>`).join("")}</div></div>
+    <div class="card"><strong>Recent runs</strong>${data.runs.map((r) => `<details><summary><span class="${r.ok === 1 ? "approved" : r.ok === 0 ? "failed" : "pending"}">${r.ok === 1 ? "ok" : r.ok === 0 ? "failed" : "running"}</span> ${esc(r.job)} · ${esc(r.started_at)}</summary><pre>${esc(r.detail)}</pre></details>`).join("") || '<div class="empty">No runs yet.</div>'}</div>`;
+}
+
+const VIEWS = { drafts: renderDrafts, conferences: renderConferences, mentions: renderMentions, reports: renderReports, system: renderSystem };
+
+function render() {
+  const tab = (location.hash.slice(1) || "drafts");
+  document.querySelectorAll("nav a").forEach((a) => a.classList.toggle("on", a.hash === "#" + tab));
+  document.getElementById("view").innerHTML = (VIEWS[tab] ?? renderDrafts)();
+  document.querySelectorAll("[data-id]").forEach(updateCount);
+}
+
+function updateCount(card) {
+  const d = data.drafts.find((x) => x.id === Number(card.dataset.id));
+  const text = card.querySelector('[data-f="text"]').value;
+  const limit = LIMITS[d.platform];
+  const el = card.querySelector("[data-count]");
+  el.textContent = `${text.length} / ${limit}`;
+  el.classList.toggle("over", text.length > limit);
+}
+
+function draftFields(card) {
+  const out = {};
+  card.querySelectorAll("[data-f]").forEach((el) => {
+    out[el.dataset.f] = el.dataset.f === "scheduled_for" ? toUtcSql(el.value) : (el.value || null);
+  });
+  return out;
+}
+
+document.addEventListener("input", (e) => {
+  const card = e.target.closest("[data-id]");
+  if (card && e.target.dataset.f === "text") updateCount(card);
+});
+
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  try {
+    if (btn.dataset.filter) { draftFilter = btn.dataset.filter; return render(); }
+    if (btn.dataset.job) {
+      btn.disabled = true;
+      await api(`/api/jobs/${btn.dataset.job}`, {});
+      btn.textContent = "Started. Check System for progress";
+      return;
+    }
+    const card = btn.closest("[data-id]");
+    if (card && btn.dataset.a) {
+      const id = card.dataset.id;
+      btn.disabled = true;
+      if (btn.dataset.a === "publish") {
+        if (!confirm("Publish this now?")) { btn.disabled = false; return; }
+        await api(`/api/drafts/${id}`, draftFields(card));
+        const r = await api(`/api/drafts/${id}/publish`, {});
+        if (!r.published) alert("Publishing failed. See the error on the draft.");
+      } else {
+        const action = btn.dataset.a === "save" ? undefined : btn.dataset.a;
+        await api(`/api/drafts/${id}`, { ...(action === "reopen" ? {} : draftFields(card)), action });
+      }
+      return refresh();
+    }
+    const conf = btn.closest("[data-conf]");
+    if (conf && btn.dataset.ca === "save") {
+      const body = {};
+      conf.querySelectorAll("textarea[data-cf]").forEach((el) => body[el.dataset.cf] = el.value);
+      await api(`/api/conferences/${conf.dataset.conf}`, body);
+      return refresh();
+    }
+    if (conf && btn.dataset.ca === "abstract") {
+      btn.disabled = true;
+      await api(`/api/conferences/${conf.dataset.conf}/abstract`, { angle: conf.querySelector("[data-angle]").value });
+      btn.textContent = "Drafting… refresh in a minute";
+    }
+  } catch (err) {
+    alert(err.message);
+    btn.disabled = false;
+  }
+});
+
+document.addEventListener("change", async (e) => {
+  const conf = e.target.closest("[data-conf]");
+  if (conf && e.target.dataset.cf === "status") {
+    await api(`/api/conferences/${conf.dataset.conf}`, { status: e.target.value });
+    refresh();
+  }
+});
+
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "addconf") return;
+  e.preventDefault();
+  const body = Object.fromEntries(new FormData(e.target));
+  try { await api("/api/conferences", body); refresh(); } catch (err) { alert(err.message); }
+});
+
+window.addEventListener("hashchange", render);
+refresh();
+setInterval(() => { if (!document.querySelector("textarea:focus, input:focus")) refresh(); }, 60000);
+</script>
+</body>
+</html>

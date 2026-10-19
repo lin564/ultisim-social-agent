@@ -1,0 +1,269 @@
+{
+  "_readme": "The agent's source of truth. It never states a fact about a company, product or person that is not in this file or in a source it found and cites. Replace every TODO before turning on the scheduler. Edit freely; it is re-read on every run.",
+  "organization": "UltiSim",
+  "website": "https://ultisim.com",
+  "voice": {
+    "summary": "Consummate professional: confident, specific, generous with expertise. We teach first and sell second.",
+    "do": [
+      "Lead with a concrete insight, number, or lesson learned.",
+      "Credit partners, customers and co-presenters by name.",
+      "Write like a practitioner talking to peers.",
+      "One clear call to action at most.",
+      "Quote people only with the exact words in approved_quotes."
+    ],
+    "dont": [
+      "Hype words: revolutionary, game-changing, disruptive, unlock, leverage.",
+      "Claims about customers, contracts, outcomes or numbers that are not in this file or a cited source.",
+      "Politics, competitor bashing, or comment on tragedies or shootings in the news.",
+      "More than two hashtags on LinkedIn, more than one on X.",
+      "Naming clients, partners, pilots, contracts or proposals unless they appear in this file."
+    ]
+  },
+  "entities": [
+    {
+      "id": "ultisim",
+      "type": "company",
+      "name": "UltiSim",
+      "description": "UltiSim is a Chapel Hill, North Carolina company that builds simulations and learning experiences with game technology and AI, for education, healthcare, defense, energy and industry.",
+      "facts": [
+        "Based in Chapel Hill, North Carolina.",
+        "Builds simulation learning experiences with game technology and AI.",
+        "Serves education, healthcare, defense and energy, among other sectors.",
+        "In August 2024 UltiSim announced a collaboration with PowerSchool to bring its simulated learning experiences to K-12 classrooms through PowerSchool's ContentNav repository.",
+        "Co-produced the web-based 3D game 'In the Footsteps of Matthew Henson', about the Arctic explorer, with In the Footsteps of History (2024).",
+        "Works in digital twins, simulation learning and AI in education."
+      ],
+      "products": [
+        {
+          "name": "QuestSim",
+          "description": "UltiSim's education platform: 3D adventure learning games for K-12 that run in the browser, including on Chromebooks.",
+          "url": "https://questsim.com"
+        },
+        {
+          "name": "Ri Koh",
+          "description": "An enterprise AI solution for small federal contractor companies.",
+          "url": "TODO"
+        },
+        {
+          "name": "TalkEngine and RolePlayED",
+          "description": "Interactive conversations with AI-driven virtual characters that show body language and emotion, so learners can practice communication skills and get personalized feedback. The characters adapt to each learner's responses and emotional state, and learning records are tracked."
+        },
+        {
+          "name": "Windcaller 3D",
+          "description": "A precision long-range rifle shooting simulator in the browser. It models G1 point-mass ballistics, air density, wind along the bullet's path, spin drift and Coriolis, on three F-Class ranges with distinct wind character, with an after-action review that replays the same wind.",
+          "url": "https://windcaller3d.com"
+        }
+      ],
+      "handles": {
+        "x": "TODO",
+        "linkedin": "https://www.linkedin.com/company/ultisim",
+        "instagram": "TODO",
+        "facebook": "https://www.facebook.com/UltisimInc"
+      },
+      "website": "https://ultisim.com"
+    },
+    {
+      "id": "questsim",
+      "type": "company",
+      "name": "QuestSim",
+      "description": "QuestSim is UltiSim's K-12 education platform: 3D adventure learning games that students play in the browser, including on Chromebooks. Linda Bernard leads the initiative.",
+      "facts": [
+        "Part of UltiSim; led by Linda Bernard.",
+        "3D adventure learning games for K-12, accessible on Chromebooks.",
+        "Available to schools through UltiSim's 2024 collaboration with PowerSchool's ContentNav."
+      ],
+      "products": [],
+      "handles": {
+        "facebook": "https://www.facebook.com/questsim/"
+      },
+      "website": "https://questsim.com"
+    },
+    {
+      "id": "healthsim-ai",
+      "type": "company",
+      "name": "HealthSimAI",
+      "description": "HealthSimAI brings digital twin, modeling, simulation and AI technology from the defense and mission-critical world to healthcare. It was established in September 2026 and is headquartered in Chapel Hill, North Carolina. Its Healthcare Decision Intelligence Platform, powered by a Living Healthcare Digital Twin, gives health systems a real-time, predictive view of hospital operations, so leaders can test what-if scenarios before changing anything on the floor.",
+      "facts": [
+        "Established in September 2026; headquartered in Chapel Hill, North Carolina.",
+        "CEO: Bob Kleinhample.",
+        "Launched the Healthcare Decision Intelligence Platform, powered by a Living Healthcare Digital Twin, in October 2026.",
+        "The platform integrates a hospital's physical environment, patient flows, staffing, resources, capacity and operational data.",
+        "Leaders use it to visualize current operations, simulate changes, and evaluate the likely impact of decisions before implementing them.",
+        "Targets patient flow and capacity, workforce and resource utilization, emergency department operations, operating room performance, facility planning and capital investment decisions.",
+        "Initial applications focus on hospital operations and patient flow, including emergency department operations, capacity, staffing and resource utilization.",
+        "Builds on decades of modeling, simulation and digital engineering for complex defense applications.",
+        "Its broader vision is 'Digital First Healthcare': living digital representations of health systems used to understand, predict, evaluate and continuously optimize operations.",
+        "Never name hospitals, health systems or pilot sites."
+      ],
+      "products": [
+        {
+          "name": "Healthcare Decision Intelligence Platform",
+          "description": "Powered by a Living Healthcare Digital Twin: a living digital representation of a hospital for visualizing operations, simulating changes and testing what-if scenarios.",
+          "url": "https://www.healthsimai.com"
+        },
+        {
+          "name": "Healthcare Digital Twin Command Center",
+          "description": "Named in the launch announcement alongside the platform.",
+          "url": "https://www.healthsimai.com"
+        }
+      ],
+      "handles": {},
+      "website": "https://www.healthsimai.com",
+      "approved_quotes": [
+        {
+          "speaker": "Bob Kleinhample, CEO of HealthSimAI",
+          "quote": "Healthcare systems are making some of the most consequential operational decisions imaginable, often without the ability to see how those decisions will play out across the entire system. We are bringing proven digital twin and simulation capabilities from the defense and mission-critical world to healthcare so leaders can simulate, test, and optimize decisions before they impact patients, clinicians and operations."
+        }
+      ]
+    },
+    {
+      "id": "bob-kleinhample",
+      "type": "person",
+      "name": "Bob Kleinhample",
+      "title": "CEO, HealthSimAI",
+      "description": "Bob Kleinhample is CEO of HealthSimAI, which brings defense-grade digital twin and simulation technology to hospital operations.",
+      "facts": [
+        "CEO of HealthSimAI."
+      ],
+      "handles": {
+        "linkedin": "TODO"
+      }
+    },
+    {
+      "id": "richard-boyd",
+      "type": "person",
+      "name": "Richard Boyd",
+      "title": "Co-founder and Chairman, UltiSim",
+      "description": "Richard Boyd co-founded UltiSim in Chapel Hill, North Carolina, and has spent his career building companies at the meeting point of game technology, simulation and AI. He co-founded 3Dsolve, which Lockheed Martin acquired in 2007, and then led Lockheed Martin's Virtual World Labs. He also co-founded Tanjo, which builds platforms for people and machines to work together. He speaks widely on what he calls the 'Simulation Century'.",
+      "facts": [
+        "Co-founder and Chairman of UltiSim.",
+        "Co-founded 3Dsolve, acquired by Lockheed Martin in 2007.",
+        "Led Virtual World Labs at Lockheed Martin after the acquisition.",
+        "Co-founder of Tanjo.",
+        "Keynote speaker on AI and simulation; frames this era as the 'Simulation Century'."
+      ],
+      "handles": {
+        "x": "TODO",
+        "linkedin": "TODO"
+      }
+    },
+    {
+      "id": "linda-bernard",
+      "type": "person",
+      "name": "Linda Bernard",
+      "title": "COO and Chief Learning Officer, UltiSim",
+      "description": "Linda Bernard is COO and Chief Learning Officer at UltiSim, where she leads the QuestSim 3D adventure games initiative for K-12 education. She brings more than twenty years of experience in teaching, school administration and education technology, and hosts the podcast 'Education in the Simulation Century', interviewing educators, researchers, entrepreneurs and thought leaders about new approaches to learning.",
+      "facts": [
+        "COO and Chief Learning Officer at UltiSim.",
+        "Leads QuestSim, UltiSim's K-12 3D adventure games initiative.",
+        "More than twenty years in teaching, school administration and education technology.",
+        "Hosts the podcast 'Education in the Simulation Century'.",
+        "Listed as a speaker at ITEC."
+      ],
+      "handles": {
+        "linkedin": "TODO"
+      }
+    }
+  ],
+  "pillars": [
+    {
+      "id": "thought-leadership",
+      "weight": 3,
+      "description": "Digital twins, simulation learning, AI in education, serious games and synthetic training environments: lessons, trends and opinions from Richard and Linda."
+    },
+    {
+      "id": "healthcare-sim",
+      "weight": 2,
+      "description": "Digital twins and simulation for hospital operations: patient flow, capacity, staffing, ED and OR performance, and 'Digital First Healthcare' (HealthSimAI)."
+    },
+    {
+      "id": "k12-learning",
+      "weight": 2,
+      "description": "Game-based and simulation learning in K-12 (QuestSim), and Linda's podcast conversations on education in the Simulation Century."
+    },
+    {
+      "id": "product",
+      "weight": 2,
+      "description": "Product stories for QuestSim, Ri Koh, TalkEngine/RolePlayED and Windcaller 3D, and for HealthSimAI's Healthcare Decision Intelligence Platform."
+    },
+    {
+      "id": "shooting-education",
+      "weight": 2,
+      "description": "Ballistics and wind-reading explainers drawn from Windcaller 3D's engine: mirage, wind along the path, spin drift, Coriolis, MOA vs MRAD. Educational and safety-minded."
+    },
+    {
+      "id": "news",
+      "weight": 1,
+      "description": "Reacting to news about the companies, the people, or their fields, with a point of view."
+    },
+    {
+      "id": "events",
+      "weight": 1,
+      "description": "Talks, panels, conference appearances and calls for papers."
+    }
+  ],
+  "platforms": {
+    "x": {
+      "maxChars": 280,
+      "style": "One sharp idea. No thread unless asked."
+    },
+    "linkedin": {
+      "maxChars": 3000,
+      "style": "Hook in the first two lines, short paragraphs, end with a question or a takeaway."
+    },
+    "facebook": {
+      "maxChars": 2000,
+      "style": "Conversational, community-minded."
+    },
+    "instagram": {
+      "maxChars": 2200,
+      "style": "Needs an image. Caption tells the story behind the image."
+    },
+    "reddit": {
+      "maxChars": 10000,
+      "style": "Plain, useful, no marketing tone. Disclose affiliation. Follow each subreddit's self-promotion rules."
+    },
+    "discord": {
+      "maxChars": 2000,
+      "style": "Community update tone."
+    }
+  },
+  "conferences": {
+    "fields": [
+      "modeling, simulation and training (defense and industry)",
+      "healthcare simulation and medical education",
+      "AI in healthcare",
+      "serious games and game-based learning",
+      "XR, virtual worlds and spatial computing",
+      "shooting sports, firearms training and outdoor industry",
+      "government contracting and AI for small businesses"
+    ],
+    "seed": [
+      "I/ITSEC",
+      "IMSH",
+      "HIMSS",
+      "GDC",
+      "Serious Play",
+      "AWE",
+      "SHOT Show",
+      "MODSIM World",
+      "SimTecT",
+      "ITEC",
+      "AMEE",
+      "INACSL"
+    ],
+    "speakers": [
+      "richard-boyd",
+      "linda-bernard",
+      "bob-kleinhample"
+    ],
+    "regions": "Worldwide; prefer North America and Europe.",
+    "remindDaysBefore": [
+      30,
+      14,
+      7,
+      3,
+      1
+    ]
+  }
+}
