@@ -65,3 +65,53 @@ After that the scheduler runs on its own (times are US Eastern):
 | Weekly report | Monday 9:00 |
 
 To change anything later, such as adding a platform, a token or a schedule, edit the service's **Environment** tab in Render. Saving restarts the service.
+
+## 5. LinkedIn
+
+LinkedIn treats personal profiles and company pages differently:
+
+| | Personal profiles (Richard, Linda, Bob) | UltiSim company page |
+|---|---|---|
+| LinkedIn product | **Share on LinkedIn**: self-serve, available immediately | **Community Management API**: you apply, and LinkedIn reviews |
+| Token life | 60 days, then generate a new one | Renews itself once approved |
+| Who signs in | Each person, with their own LinkedIn login | A page admin |
+
+Each person approves the drafts written in their own voice before they go out.
+
+### 5a. Personal profiles (about 20 min, plus 5 min per person)
+
+1. Go to [linkedin.com/developers/apps](https://www.linkedin.com/developers/apps) → **Create app**.
+   - **App name:** `UltiSim Social Desk – Profiles`.
+   - **LinkedIn Page:** UltiSim.
+   - Add the logo and a privacy policy URL, and accept the terms.
+2. On the app's **Settings** tab, click **Verify** and send the link to an UltiSim page admin, or open it yourself if you're an admin.
+3. On the **Products** tab, request **Share on LinkedIn** and **Sign In with LinkedIn using OpenID Connect**. Both are granted straight away.
+4. On the **Auth** tab, under **Authorized redirect URLs**, add `https://www.linkedin.com/developers/tools/oauth/redirect`. The token tool in the next step needs it.
+5. Each person does this on their own computer, logged in to **their own** LinkedIn account:
+   - Open the [OAuth token generator](https://www.linkedin.com/developers/tools/oauth/token-generator) and pick the app.
+   - Tick `openid`, `profile` and `w_member_social`, then click **Request access token** and allow.
+   - Copy the token straight into Render (**Environment** tab) under their name:
+     - `LINKEDIN_ACCESS_TOKEN_RICHARD_BOYD`
+     - `LINKEDIN_ACCESS_TOKEN_LINDA_BERNARD`
+     - `LINKEDIN_ACCESS_TOKEN_BOB_KLEINHAMPLE`
+6. Save. Render restarts, and **System** shows linkedin as connected.
+
+These tokens expire after 60 days. Put a reminder in each person's calendar to repeat step 5. If a token runs out first, the next publish fails with a message saying which person's token to renew.
+
+### 5b. Company page (apply now; approval takes days to weeks)
+
+1. Create a **second** app the same way: `UltiSim Social Desk – Page`, with LinkedIn Page set to UltiSim. LinkedIn wants the Community Management API on an app of its own.
+2. On **Products**, choose **Community Management API → Request access** and fill in the form. Use the legal company name, ultisim.com and an @ultisim.com email. For the use-case question, paste the text below.
+3. LinkedIn grants a **Development tier** first, then **Standard** after review.
+4. Once access is granted:
+   - Open the token generator again and pick this app. Tick `w_organization_social` and `r_organization_social`, then generate a token as a page admin.
+   - Set these in Render:
+     - `LINKEDIN_ACCESS_TOKEN`: the token.
+     - `LINKEDIN_REFRESH_TOKEN`: the refresh token, if the tool shows one.
+     - `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET`: from the app's **Auth** tab.
+     - `LINKEDIN_AUTHOR`: the number in the address when you manage the page, `linkedin.com/company/<number>/admin`.
+   - With the refresh token set, the agent renews its own access.
+
+Use-case text for the access form:
+
+> UltiSim Inc. is a simulation and AI company in Chapel Hill, North Carolina. We are building an internal tool that helps our small marketing team publish to our own LinkedIn company page. A staff member reviews and approves every post in our tool before it is published through the Posts API with w_organization_social. We read our own page's post statistics (r_organization_social) for a weekly internal report. We manage only our own organization's page. We do not access member data, and we do not offer this tool to third parties.
