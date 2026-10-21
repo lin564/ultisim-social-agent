@@ -235,7 +235,10 @@ test("the privacy and data deletion pages are public", async () => {
       assert.equal(res.status, 200, path);
       assert.match(await res.text(), /info@ultisim\.com/);
     }
-    assert.equal((await fetch(`http://localhost:${server.address().port}/`)).status, 401, "the dashboard still needs the password");
+    const base = `http://localhost:${server.address().port}`;
+    assert.equal((await fetch(`${base}/privacy`, { method: "HEAD" })).status, 200, "link checkers send HEAD");
+    assert.equal((await fetch(`${base}/privacy/?ref=meta`)).status, 200, "trailing slash and query");
+    assert.equal((await fetch(`${base}/`)).status, 401, "the dashboard still needs the password");
   } finally {
     server.close();
   }

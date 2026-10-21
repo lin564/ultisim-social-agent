@@ -66,8 +66,11 @@ export function createApp(db) {
       res.end(type === "application/json" ? JSON.stringify(body) : body);
     };
     if (req.url === "/healthz") return send(200, { ok: true });
-    const publicPage = PUBLIC_PAGES[req.url.split("?")[0]];
-    if (req.method === "GET" && publicPage) return send(200, readFileSync(publicPage), "text/html; charset=utf-8");
+    // Link checkers (Meta's among them) often send HEAD, and people paste links with a trailing slash.
+    const publicPage = PUBLIC_PAGES[req.url.split("?")[0].replace(/(.)\/+$/, "$1")];
+    if ((req.method === "GET" || req.method === "HEAD") && publicPage) {
+      return send(200, readFileSync(publicPage), "text/html; charset=utf-8");
+    }
     if (!authorized(req)) {
       res.writeHead(401, { "WWW-Authenticate": 'Basic realm="social-agent"' });
       return res.end();
