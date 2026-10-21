@@ -2,33 +2,38 @@ import { request, cred } from "./http.js";
 import { loadBrand, entityById } from "../brand.js";
 
 // LinkedIn Posts API.
-// Company page: a token with w_organization_social (Community Management API) and LINKEDIN_AUTHOR set to the
-//   page's organization id (the number in linkedin.com/company/<id>/admin) or urn:li:organization:<id>.
+// Company pages: a page admin's token with w_organization_social (Community Management API) and, per page,
+//   LINKEDIN_AUTHOR (UltiSim) or LINKEDIN_AUTHOR_<ENTITY> (e.g. _QUESTSIM) set to the page's organization id
+//   (the number in linkedin.com/company/<id>/admin) or urn:li:organization:<id>. One admin token posts to every
+//   page that admin manages, so other company pages share UltiSim's token unless given their own.
 //   With LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET and LINKEDIN_REFRESH_TOKEN the access token renews itself.
 // A person's own profile: a token with w_member_social plus openid and profile in LINKEDIN_ACCESS_TOKEN_<ENTITY>.
 //   Their author URN is looked up from the token, so LINKEDIN_AUTHOR_<ENTITY> is optional.
 const API = "https://api.linkedin.com";
-const tokens = new Map();   // account -> { token, expires } for refreshed company tokens
+const tokens = new Map();   // refresh token -> { token, expires }
 const authors = new Map();  // account -> looked-up person URN
 
 const isPerson = (account) => entityById(loadBrand(), account)?.type === "person";
+// A person always uses their own credentials; a company page falls back to the shared admin credentials.
+const tokenCred = (key, account) => cred(key, account) || (isPerson(account) ? undefined : process.env[key]);
 const canRefresh = (account) =>
-  Boolean(cred("LINKEDIN_REFRESH_TOKEN", account) && cred("LINKEDIN_CLIENT_ID", account) && cred("LINKEDIN_CLIENT_SECRET", account));
+  Boolean(tokenCred("LINKEDIN_REFRESH_TOKEN", account) && tokenCred("LINKEDIN_CLIENT_ID", account) && tokenCred("LINKEDIN_CLIENT_SECRET", account));
 
 async function accessToken(account) {
-  if (!canRefresh(account)) return cred("LINKEDIN_ACCESS_TOKEN", account);
-  const cached = tokens.get(account);
+  if (!canRefresh(account)) return tokenCred("LINKEDIN_ACCESS_TOKEN", account);
+  const refreshToken = tokenCred("LINKEDIN_REFRESH_TOKEN", account);
+  const cached = tokens.get(refreshToken);
   if (cached && Date.now() < cached.expires) return cached.token;
   const { data } = await request("linkedin", "https://www.linkedin.com/oauth/v2/accessToken", {
     method: "POST",
     form: {
       grant_type: "refresh_token",
-      refresh_token: cred("LINKEDIN_REFRESH_TOKEN", account),
-      client_id: cred("LINKEDIN_CLIENT_ID", account),
-      client_secret: cred("LINKEDIN_CLIENT_SECRET", account),
+      refresh_token: refreshToken,
+      client_id: tokenCred("LINKEDIN_CLIENT_ID", account),
+      client_secret: tokenCred("LINKEDIN_CLIENT_SECRET", account),
     },
   });
-  tokens.set(account, { token: data.access_token, expires: Date.now() + (data.expires_in - 3600) * 1000 });
+  tokens.set(refreshToken, { token: data.access_token, expires: Date.now() + (data.expires_in - 3600) * 1000 });
   return data.access_token;
 }
 
@@ -45,7 +50,7 @@ async function author(account, token) {
 export default {
   name: "linkedin",
   configured: (account) =>
-    Boolean((cred("LINKEDIN_ACCESS_TOKEN", account) || canRefresh(account)) && (cred("LINKEDIN_AUTHOR", account) || isPerson(account))),
+    Boolean((tokenCred("LINKEDIN_ACCESS_TOKEN", account) || canRefresh(account)) && (cred("LINKEDIN_AUTHOR", account) || isPerson(account))),
 
   async publish(draft) {
     if (draft.kind === "reply") throw new Error("LinkedIn replies need the Community Management API; reply by hand for now");

@@ -170,3 +170,20 @@ test("the company LinkedIn token renews itself from the refresh token", async ()
     for (const k of ["LINKEDIN_REFRESH_TOKEN", "LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET", "LINKEDIN_AUTHOR"]) delete process.env[k];
   }
 });
+
+test("the QuestSim LinkedIn page posts with the shared admin token and its own page id", async () => {
+  Object.assign(process.env, { LINKEDIN_ACCESS_TOKEN: "admin-token", LINKEDIN_AUTHOR: "111", LINKEDIN_AUTHOR_QUESTSIM: "222" });
+  const db = openDb(":memory:");
+  db.prepare("INSERT INTO drafts (platform, account, text, status) VALUES ('linkedin', 'questsim', 'hello', 'approved')").run();
+  try {
+    const li = connectedAccounts(loadBrand()).filter((a) => a.platform === "linkedin").map((a) => a.account);
+    assert.deepEqual(li, ["ultisim", "questsim"], "people without their own token are not connected");
+    await withFetch(() => new Response("", { status: 201, headers: { "x-restli-id": "urn:li:share:11" } }), async (calls) => {
+      assert.equal((await publishDue(db)).published, 1);
+      assert.equal(calls[0].init.headers.Authorization, "Bearer admin-token");
+      assert.equal(JSON.parse(calls[0].init.body).author, "urn:li:organization:222");
+    });
+  } finally {
+    for (const k of ["LINKEDIN_ACCESS_TOKEN", "LINKEDIN_AUTHOR", "LINKEDIN_AUTHOR_QUESTSIM"]) delete process.env[k];
+  }
+});
