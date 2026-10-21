@@ -8,6 +8,11 @@ import { platforms } from "./platforms/index.js";
 import { startScheduler } from "./scheduler.js";
 
 const PAGE = new URL("../public/index.html", import.meta.url);
+// Public pages the platforms' developer settings link to; no dashboard password needed.
+const PUBLIC_PAGES = {
+  "/privacy": new URL("../public/legal/privacy.html", import.meta.url),
+  "/data-deletion": new URL("../public/legal/data-deletion.html", import.meta.url),
+};
 const DRAFT_EDITABLE = ["text", "title", "target", "image_url", "scheduled_for", "platform", "account"];
 const CONF_EDITABLE = ["status", "notes", "cfp_deadline", "cfp_url", "abstract", "speakers"];
 const CONF_STATUSES = ["watching", "applying", "submitted", "accepted", "declined", "skipped", "missed"];
@@ -61,6 +66,8 @@ export function createApp(db) {
       res.end(type === "application/json" ? JSON.stringify(body) : body);
     };
     if (req.url === "/healthz") return send(200, { ok: true });
+    const publicPage = PUBLIC_PAGES[req.url.split("?")[0]];
+    if (req.method === "GET" && publicPage) return send(200, readFileSync(publicPage), "text/html; charset=utf-8");
     if (!authorized(req)) {
       res.writeHead(401, { "WWW-Authenticate": 'Basic realm="social-agent"' });
       return res.end();

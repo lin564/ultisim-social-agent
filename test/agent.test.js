@@ -225,3 +225,18 @@ test("X mention checks ask only for mentions newer than the last one seen", asyn
     for (const k of Object.keys(xKeys)) delete process.env[k];
   }
 });
+
+test("the privacy and data deletion pages are public", async () => {
+  process.env.DASHBOARD_PASSWORD = "s3cret";
+  const server = createApp(openDb(":memory:")).listen(0);
+  try {
+    for (const path of ["/privacy", "/data-deletion"]) {
+      const res = await fetch(`http://localhost:${server.address().port}${path}`);
+      assert.equal(res.status, 200, path);
+      assert.match(await res.text(), /info@ultisim\.com/);
+    }
+    assert.equal((await fetch(`http://localhost:${server.address().port}/`)).status, 401, "the dashboard still needs the password");
+  } finally {
+    server.close();
+  }
+});
