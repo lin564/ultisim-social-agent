@@ -6,6 +6,8 @@ import { publishDue } from "../src/jobs/publish.js";
 import { createApp } from "../src/server.js";
 import { connectedAccounts } from "../src/platforms/index.js";
 import { loadBrand } from "../src/brand.js";
+import { oauthHeader } from "../src/platforms/x.js";
+import { checkMentions } from "../src/jobs/mentions.js";
 
 delete process.env.SLACK_WEBHOOK_URL;
 
@@ -45,7 +47,8 @@ test("publishing only sends approved drafts and records the result", async () =>
   const approved = add.run("approved post", "approved").lastInsertRowid;
   add.run("pending post", "pending");
 
-  process.env.X_ACCESS_TOKEN = "test-token";
+  const xKeys = { X_API_KEY: "k", X_API_SECRET: "s", X_ACCESS_TOKEN: "42-t", X_ACCESS_TOKEN_SECRET: "ts" };
+  Object.assign(process.env, xKeys);
   const sent = [];
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, init) => {
@@ -61,7 +64,7 @@ test("publishing only sends approved drafts and records the result", async () =>
     assert.deepEqual({ ...row }, { status: "published", external_id: "123" });
   } finally {
     globalThis.fetch = realFetch;
-    delete process.env.X_ACCESS_TOKEN;
+    for (const k of Object.keys(xKeys)) delete process.env[k];
   }
 });
 
@@ -185,5 +188,40 @@ test("the QuestSim LinkedIn page posts with the shared admin token and its own p
     });
   } finally {
     for (const k of ["LINKEDIN_ACCESS_TOKEN", "LINKEDIN_AUTHOR", "LINKEDIN_AUTHOR_QUESTSIM"]) delete process.env[k];
+  }
+});
+
+test("X requests are signed with OAuth 1.0a exactly as X's documentation example", () => {
+  // The worked example from X's "Creating a signature" guide.
+  const header = oauthHeader("POST", "https://api.twitter.com/1.1/statuses/update.json?include_entities=true", {
+    X_API_KEY: "xvz1evFS4wEEPTGEFPHBog",
+    X_API_SECRET: "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
+    X_ACCESS_TOKEN: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
+    X_ACCESS_TOKEN_SECRET: "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
+  }, {
+    form: { status: "Hello Ladies + Gentlemen, a signed OAuth request!" },
+    nonce: "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg",
+    timestamp: 1318622958,
+  });
+  assert.match(header, /oauth_signature="hCtSmYh%2BiHYCEqBWrE7C7hYmtUk%3D"/);
+});
+
+test("X mention checks ask only for mentions newer than the last one seen", async () => {
+  const xKeys = { X_API_KEY: "k", X_API_SECRET: "s", X_ACCESS_TOKEN: "777-t", X_ACCESS_TOKEN_SECRET: "ts" };
+  Object.assign(process.env, xKeys);
+  const db = openDb(":memory:");
+  const insert = db.prepare("INSERT INTO mentions (platform, account, external_id, text, status) VALUES ('x', 'ultisim', ?, 'hi', 'ignored')");
+  insert.run("9");
+  insert.run("1000");
+  try {
+    await withFetch(() => new Response(JSON.stringify({ meta: { result_count: 0 } }), { status: 200 }), async (calls) => {
+      await checkMentions(db);
+      const url = new URL(calls[0].url);
+      assert.equal(url.pathname, "/2/users/777/mentions", "user id comes from the access token");
+      assert.equal(url.searchParams.get("since_id"), "1000");
+      assert.match(calls[0].init.headers.Authorization, /^OAuth /);
+    });
+  } finally {
+    for (const k of Object.keys(xKeys)) delete process.env[k];
   }
 });

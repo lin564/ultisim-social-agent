@@ -116,3 +116,27 @@ Posts from Richard's, Linda's or Bob's own profile usually reach more people tha
    - Ticks `openid`, `profile` and `w_member_social`, and generates a token.
    - Pastes it into Render as `LINKEDIN_ACCESS_TOKEN_RICHARD_BOYD`, `LINKEDIN_ACCESS_TOKEN_LINDA_BERNARD` or `LINKEDIN_ACCESS_TOKEN_BOB_KLEINHAMPLE`.
 4. These tokens last 60 days. Put a reminder in each person's calendar to repeat step 3. If a token runs out first, the next publish fails with a message saying whose token to renew.
+
+## 6. X
+
+X's API is billed per request from credits you buy in advance. At a few posts a week it typically costs a few dollars a month; posts that contain a link cost more.
+
+1. Sign in to [developer.x.com](https://developer.x.com) **as the UltiSim X account**, and sign up for developer access. For the use-case description, say plainly what the tool does:
+   - posts our own content after a person approves it;
+   - reads mentions of our account so we can reply, with AI-suggested replies that a person approves;
+   - reads our own posts' public metrics for an internal report;
+   - doesn't resell data, train models on it, or share it with anyone.
+2. Buy a small amount of credit, e.g. $10–20, and turn off auto-recharge or set a low cap.
+3. Open your app and go to **User authentication settings → Edit**:
+   - **App permissions:** Read and write.
+   - **Type of app:** Web App, Automated App or Bot.
+   - **Callback URL and Website URL:** `https://ultisim.com`.
+
+   Save.
+4. Go to **Keys and tokens**:
+   - Regenerate the **API Key and Secret**.
+   - Generate the **Access Token and Secret**. The panel should say **Read and Write**; if it says Read only, regenerate it.
+5. In Render (**Environment** tab), add `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN` and `X_ACCESS_TOKEN_SECRET`, and save.
+
+These keys don't expire. If you ever regenerate them in the X console, update Render too.
+
