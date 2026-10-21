@@ -13,6 +13,16 @@ const TriageSchema = z.object({
   })),
 });
 
+/**
+ * The newest numeric mention id already stored for an account, so platforms that bill per read (X) are asked only
+ * for newer ones. Platforms with non-numeric ids get undefined and ignore it.
+ */
+function newestSeen(db, platform, account) {
+  const ids = db.prepare("SELECT external_id FROM mentions WHERE platform = ? AND account = ?").all(platform, account)
+    .map((r) => r.external_id).filter((id) => /^\d+$/.test(id));
+  return ids.length ? ids.reduce((a, b) => (BigInt(b) > BigInt(a) ? b : a)) : undefined;
+}
+
 /** Pulls new mentions and comments, and drafts replies for review. Nothing is sent without approval. */
 export async function checkMentions(db) {
   const brand = loadBrand();
@@ -22,7 +32,8 @@ export async function checkMentions(db) {
     const p = platforms[platform];
     if (!p.fetchMentions) continue;
     try {
-      for (const m of await p.fetchMentions(account)) insert.run(platform, account, m.external_id, m.author, m.text, m.url);
+      const sinceId = newestSeen(db, platform, account);
+      for (const m of await p.fetchMentions(account, { sinceId })) insert.run(platform, account, m.external_id, m.author, m.text, m.url);
     } catch (err) {
       errors.push(err.message);
     }
