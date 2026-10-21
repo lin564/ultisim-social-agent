@@ -65,3 +65,54 @@ After that the scheduler runs on its own (times are US Eastern):
 | Weekly report | Monday 9:00 |
 
 To change anything later, such as adding a platform, a token or a schedule, edit the service's **Environment** tab in Render. Saving restarts the service.
+
+## 5. LinkedIn
+
+The agent posts to the **UltiSim** and **QuestSim** company pages. Personal profiles for Richard, Linda and Bob are an optional extra.
+
+| | Company pages (UltiSim, QuestSim) | Personal profiles (optional) |
+|---|---|---|
+| LinkedIn product | **Community Management API**: you apply once and LinkedIn reviews it, usually within days to weeks | **Share on LinkedIn**: self-serve, available immediately |
+| Token | One page admin's token covers both pages, and it renews itself | Each person makes their own and renews it every 60 days |
+
+### 5a. Company pages: apply now
+
+1. Go to [linkedin.com/developers/apps](https://www.linkedin.com/developers/apps) → **Create app**.
+   - **App name:** `UltiSim Social Desk`.
+   - **LinkedIn Page:** UltiSim.
+   - Add the logo and a privacy policy URL, and accept the terms.
+2. On the app's **Settings** tab, click **Verify** and approve it as an UltiSim page admin, or send the link to one.
+3. On the **Products** tab, choose **Community Management API → Request access** and fill in the form:
+   - Use the legal company name, ultisim.com and an @ultisim.com email.
+   - For the use-case question, paste the text at the end of this section.
+
+   LinkedIn wants this API on an app with no other products, so don't add any here.
+4. On the **Auth** tab, under **Authorized redirect URLs**, add `https://www.linkedin.com/developers/tools/oauth/redirect`.
+5. **Wait for approval.** LinkedIn grants a Development tier first, then Standard. Until then, keep posting to LinkedIn by hand from the approved drafts.
+6. Once approved, sign in to LinkedIn as someone who is an **admin of both the UltiSim and QuestSim pages**:
+   - Open the [OAuth token generator](https://www.linkedin.com/developers/tools/oauth/token-generator) and pick the app.
+   - Tick `w_organization_social` and `r_organization_social`, then click **Request access token** and allow.
+7. In Render (**Environment** tab), add:
+   - `LINKEDIN_ACCESS_TOKEN`: the token.
+   - `LINKEDIN_REFRESH_TOKEN`: the refresh token, if the tool shows one.
+   - `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET`: from the app's **Auth** tab.
+   - `LINKEDIN_AUTHOR`: UltiSim's page number. While managing the page, the address is `linkedin.com/company/<number>/admin`.
+   - `LINKEDIN_AUTHOR_QUESTSIM`: QuestSim's page number, found the same way.
+
+QuestSim uses the same token as UltiSim, so it needs only its page number. With the refresh token set, the agent renews its own access. Save, and **System** shows linkedin as connected.
+
+Use-case text for the access form:
+
+> UltiSim Inc. is a simulation and AI company in Chapel Hill, North Carolina. We are building an internal tool that helps our small marketing team publish to our own LinkedIn company pages, UltiSim and QuestSim. A staff member reviews and approves every post in our tool before it is published through the Posts API with w_organization_social. We read our own pages' post statistics (r_organization_social) for a weekly internal report. We manage only our own organizations' pages. We do not access member data, and we do not offer this tool to third parties.
+
+### 5b. Personal profiles (optional)
+
+Posts from Richard's, Linda's or Bob's own profile usually reach more people than company posts. Each person approves the drafts written in their voice.
+
+1. Create a **separate** app, `UltiSim Social Desk – Profiles`, the same way as in 5a, steps 1, 2 and 4.
+2. On its **Products** tab, add **Share on LinkedIn** and **Sign In with LinkedIn using OpenID Connect**. Both are granted straight away.
+3. Each person, logged in to **their own** LinkedIn account:
+   - Opens the token generator and picks this app.
+   - Ticks `openid`, `profile` and `w_member_social`, and generates a token.
+   - Pastes it into Render as `LINKEDIN_ACCESS_TOKEN_RICHARD_BOYD`, `LINKEDIN_ACCESS_TOKEN_LINDA_BERNARD` or `LINKEDIN_ACCESS_TOKEN_BOB_KLEINHAMPLE`.
+4. These tokens last 60 days. Put a reminder in each person's calendar to repeat step 3. If a token runs out first, the next publish fails with a message saying whose token to renew.

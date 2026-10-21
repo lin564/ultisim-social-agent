@@ -123,3 +123,67 @@ test("the health check answers without the dashboard password", async () => {
     server.close();
   }
 });
+
+async function withFetch(handler, fn) {
+  const realFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    return handler(String(url), init);
+  };
+  try { return await fn(calls); } finally { globalThis.fetch = realFetch; }
+}
+
+test("a person's LinkedIn post looks up their author URN from the token", async () => {
+  process.env.LINKEDIN_ACCESS_TOKEN_LINDA_BERNARD = "member-token";
+  const db = openDb(":memory:");
+  db.prepare("INSERT INTO drafts (platform, account, text, status) VALUES ('linkedin', 'linda-bernard', 'hello', 'approved')").run();
+  try {
+    await withFetch((url) => url.endsWith("/v2/userinfo")
+      ? new Response(JSON.stringify({ sub: "abc123" }), { status: 200 })
+      : new Response("", { status: 201, headers: { "x-restli-id": "urn:li:share:9" } }), async (calls) => {
+      const r = await publishDue(db);
+      assert.equal(r.published, 1);
+      const post = calls.find((c) => c.url.endsWith("/rest/posts"));
+      assert.equal(JSON.parse(post.init.body).author, "urn:li:person:abc123");
+      assert.equal(post.init.headers.Authorization, "Bearer member-token");
+    });
+  } finally {
+    delete process.env.LINKEDIN_ACCESS_TOKEN_LINDA_BERNARD;
+  }
+});
+
+test("the company LinkedIn token renews itself from the refresh token", async () => {
+  Object.assign(process.env, { LINKEDIN_REFRESH_TOKEN: "r", LINKEDIN_CLIENT_ID: "id", LINKEDIN_CLIENT_SECRET: "s", LINKEDIN_AUTHOR: "12345" });
+  const db = openDb(":memory:");
+  db.prepare("INSERT INTO drafts (platform, account, text, status) VALUES ('linkedin', 'ultisim', 'hello', 'approved')").run();
+  try {
+    await withFetch((url) => url.includes("/oauth/v2/accessToken")
+      ? new Response(JSON.stringify({ access_token: "fresh", expires_in: 5184000 }), { status: 200 })
+      : new Response("", { status: 201, headers: { "x-restli-id": "urn:li:share:10" } }), async (calls) => {
+      assert.equal((await publishDue(db)).published, 1);
+      const post = calls.find((c) => c.url.endsWith("/rest/posts"));
+      assert.equal(post.init.headers.Authorization, "Bearer fresh");
+      assert.equal(JSON.parse(post.init.body).author, "urn:li:organization:12345");
+    });
+  } finally {
+    for (const k of ["LINKEDIN_REFRESH_TOKEN", "LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET", "LINKEDIN_AUTHOR"]) delete process.env[k];
+  }
+});
+
+test("the QuestSim LinkedIn page posts with the shared admin token and its own page id", async () => {
+  Object.assign(process.env, { LINKEDIN_ACCESS_TOKEN: "admin-token", LINKEDIN_AUTHOR: "111", LINKEDIN_AUTHOR_QUESTSIM: "222" });
+  const db = openDb(":memory:");
+  db.prepare("INSERT INTO drafts (platform, account, text, status) VALUES ('linkedin', 'questsim', 'hello', 'approved')").run();
+  try {
+    const li = connectedAccounts(loadBrand()).filter((a) => a.platform === "linkedin").map((a) => a.account);
+    assert.deepEqual(li, ["ultisim", "questsim"], "people without their own token are not connected");
+    await withFetch(() => new Response("", { status: 201, headers: { "x-restli-id": "urn:li:share:11" } }), async (calls) => {
+      assert.equal((await publishDue(db)).published, 1);
+      assert.equal(calls[0].init.headers.Authorization, "Bearer admin-token");
+      assert.equal(JSON.parse(calls[0].init.body).author, "urn:li:organization:222");
+    });
+  } finally {
+    for (const k of ["LINKEDIN_ACCESS_TOKEN", "LINKEDIN_AUTHOR", "LINKEDIN_AUTHOR_QUESTSIM"]) delete process.env[k];
+  }
+});

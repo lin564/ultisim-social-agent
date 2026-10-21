@@ -48,7 +48,7 @@ The agent drafts only for accounts that have credentials, and checks mentions on
 | Platform | You need | Notes |
 |---|---|---|
 | X | A developer app on a tier that allows posting; an OAuth 2.0 user token (`tweet.read tweet.write users.read`) | `X_USER_ID` turns on mention checks. |
-| LinkedIn | An app with the Community Management API; a token with `w_organization_social` for the company page | Replies to LinkedIn comments are not automated yet; handle them on LinkedIn. |
+| LinkedIn | Company pages (UltiSim, QuestSim): an app approved for the **Community Management API**; one page admin's token covers both pages, each with its own page id. Personal profiles (optional): a **Share on LinkedIn** app and each person's token. See [docs/SETUP.md](docs/SETUP.md#5-linkedin). | The company token renews itself when refresh credentials are set; person tokens last 60 days. Replies to LinkedIn comments are not automated yet; handle them on LinkedIn. |
 | Facebook / Instagram | A Meta app; a Page access token; an Instagram professional account linked to the Page | Instagram posts need an image URL on the draft. |
 | Reddit | A "script" app plus the posting account's login | Set the subreddit on each draft. Follow each subreddit's self-promotion rules. |
 | Discord | A channel webhook URL | Publishing only. |
