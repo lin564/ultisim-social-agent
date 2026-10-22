@@ -98,6 +98,7 @@ test("dashboard requires the password and edits drafts", async () => {
 
     const state = await (await fetch(`${base}/api/state`, { headers: auth })).json();
     assert.equal(state.drafts.length, 1);
+    assert.equal(state.accounts.ultisim.handles.x, "https://x.com/UltisimTeam", "previews show each account's name and handle");
   } finally {
     server.close();
   }
