@@ -32,6 +32,11 @@
   button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   button:disabled { opacity: .5; cursor: default; }
   .count { font-size: 12px; color: var(--muted); text-align: right; }
+  .image-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .image-row input { flex: 1 1 200px; }
+  .thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); }
+  .upload-btn { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 12px; cursor: pointer; white-space: nowrap; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 4px; }
   .count.over { color: var(--bad); font-weight: 600; }
   details { margin-top: 6px; } summary { cursor: pointer; color: var(--muted); font-size: 13px; }
   pre { white-space: pre-wrap; font: inherit; margin: 6px 0 0; }
@@ -87,8 +92,13 @@ function draftCard(d) {
     ${d.platform === "reddit" && d.kind === "post" ? `<div class="row"><input data-f="target" placeholder="subreddit" value="${esc(d.target)}" ${editable ? "" : "disabled"}><input data-f="title" placeholder="title" value="${esc(d.title)}" ${editable ? "" : "disabled"}></div>` : ""}
     <div class="row"><textarea data-f="text" ${editable ? "" : "disabled"}>${esc(d.text)}</textarea></div>
     <div class="count" data-count></div>
+    ${d.image_url && !editable ? `<div class="image-row"><img class="thumb" src="${esc(d.image_url)}" alt=""></div>` : ""}
+    ${editable && d.kind === "post" && IMAGE_PLATFORMS.has(d.platform) ? `<div class="image-row">
+      ${d.image_url ? `<img class="thumb" src="${esc(d.image_url)}" alt="">` : ""}
+      <input data-f="image_url" placeholder="Image link${d.platform === "instagram" ? " (required)" : " (optional)"}" value="${esc(d.image_url)}">
+      <label class="upload-btn">Upload image<input type="file" accept="image/*" data-upload hidden></label>
+    </div><div class="note" data-upload-note></div>` : ""}
     ${editable && d.kind === "post" ? `<div class="row">
-      <input data-f="image_url" placeholder="Image URL${d.platform === "instagram" ? " (required)" : " (optional)"}" value="${esc(d.image_url)}">
       <input data-f="scheduled_for" type="datetime-local" title="Publish time, your local time. Empty publishes at the next check." value="${d.scheduled_for ? esc(toLocalInput(d.scheduled_for)) : ""}">
     </div>` : ""}
     <details><summary>Why this post${d.sources.length ? ` · ${d.sources.length} source(s)` : ""}</summary>
@@ -185,6 +195,57 @@ function updateCount(card) {
   el.textContent = `${text.length} / ${limit}`;
   el.classList.toggle("over", text.length > limit);
 }
+
+// Platforms where a draft's image is published with it.
+const IMAGE_PLATFORMS = new Set(["instagram", "facebook"]);
+
+/**
+ * Turns any image the browser can open into a JPEG no larger than 2048 px, which every platform accepts.
+ * For Instagram, it pads with white to fit Instagram's allowed shapes (4:5 portrait to 1.91:1 landscape)
+ * instead of letting the post fail.
+ */
+async function toJpeg(file, platform) {
+  const img = await createImageBitmap(file);
+  let w = img.width, h = img.height;
+  const scale = Math.min(1, 2048 / Math.max(w, h));
+  w = Math.round(w * scale); h = Math.round(h * scale);
+  let cw = w, ch = h;
+  if (platform === "instagram") {
+    if (w / h < 0.8) cw = Math.ceil(h * 0.8);
+    if (w / h > 1.91) ch = Math.ceil(w / 1.91);
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = cw; canvas.height = ch;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, cw, ch);
+  ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+  const padded = cw !== w || ch !== h;
+  return { blob: await new Promise((ok) => canvas.toBlob(ok, "image/jpeg", 0.9)), padded };
+}
+
+document.addEventListener("change", async (e) => {
+  const input = e.target.closest("[data-upload]");
+  if (!input || !input.files[0]) return;
+  const card = input.closest("[data-id]");
+  const note = card.querySelector("[data-upload-note]");
+  const d = data.drafts.find((x) => x.id === Number(card.dataset.id));
+  note.textContent = "Uploading…";
+  try {
+    const { blob, padded } = await toJpeg(input.files[0], d.platform);
+    const res = await fetch("/api/uploads", { method: "POST", headers: { "Content-Type": "image/jpeg" }, body: blob });
+    const out = await res.json();
+    if (!res.ok) throw new Error(out.error ?? res.statusText);
+    card.querySelector('[data-f="image_url"]').value = out.url;
+    await api(`/api/drafts/${d.id}`, draftFields(card));
+    await refresh();
+    if (padded) alert("Instagram only accepts images between 4:5 portrait and 1.91:1 landscape, so white borders were added to fit. Crop the photo first if you'd rather not have them.");
+  } catch (err) {
+    note.textContent = `Upload failed: ${err.message}`;
+  } finally {
+    input.value = "";
+  }
+});
 
 function draftFields(card) {
   const out = {};
