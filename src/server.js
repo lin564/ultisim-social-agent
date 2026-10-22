@@ -7,6 +7,7 @@ import { publishDue } from "./jobs/publish.js";
 import { platforms } from "./platforms/index.js";
 import { startScheduler } from "./scheduler.js";
 import { saveUpload, readUpload, MAX_UPLOAD_BYTES } from "./media.js";
+import { loadBrand } from "./brand.js";
 
 const PAGE = new URL("../public/index.html", import.meta.url);
 // Public pages the platforms' developer settings link to; no dashboard password needed.
@@ -71,6 +72,8 @@ function state(db) {
     runs: db.prepare("SELECT id, job, started_at, finished_at, ok, substr(detail, 1, 400) AS detail FROM runs ORDER BY id DESC LIMIT 25").all(),
     platforms: Object.fromEntries(Object.entries(platforms).map(([n, p]) => [n, p.configured("ultisim")])),
     jobs: Object.keys(jobs),
+    // Display names and handles for the post previews.
+    accounts: Object.fromEntries(loadBrand().entities.map((e) => [e.id, { name: e.name, handles: e.handles ?? {} }])),
   };
 }
 
