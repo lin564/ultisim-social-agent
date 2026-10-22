@@ -243,3 +243,52 @@ test("the privacy and data deletion pages are public", async () => {
     server.close();
   }
 });
+
+test("uploaded images are stored and served at a public link", async () => {
+  const { mkdtempSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  process.env.UPLOAD_DIR = mkdtempSync(`${tmpdir()}/uploads-`);
+  process.env.DASHBOARD_PASSWORD = "s3cret";
+  delete process.env.PUBLIC_URL;
+  delete process.env.RENDER_EXTERNAL_URL;
+  const server = createApp(openDb(":memory:")).listen(0);
+  const base = `http://localhost:${server.address().port}`;
+  const auth = { Authorization: `Basic ${Buffer.from("team:s3cret").toString("base64")}` };
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 0xff, 0xd9]);
+  try {
+    assert.equal((await fetch(`${base}/api/uploads`, { method: "POST", body: jpeg, headers: { "Content-Type": "image/jpeg" } })).status, 401, "uploading needs the password");
+    const bad = await fetch(`${base}/api/uploads`, { method: "POST", body: "x", headers: { ...auth, "Content-Type": "text/plain" } });
+    assert.equal(bad.status, 500);
+    assert.match((await bad.json()).error, /JPEG, PNG or WebP/);
+
+    const res = await fetch(`${base}/api/uploads`, { method: "POST", body: jpeg, headers: { ...auth, "Content-Type": "image/jpeg" } });
+    const { url } = await res.json();
+    assert.match(url, new RegExp(`^${base}/media/[a-f0-9]{24}\\.jpg$`));
+    const served = await fetch(url);
+    assert.equal(served.status, 200, "served without the password");
+    assert.equal(served.headers.get("content-type"), "image/jpeg");
+    assert.deepEqual(Buffer.from(await served.arrayBuffer()), jpeg);
+    assert.equal((await fetch(`${base}/media/..%2F..%2Fsocial-agent.db`)).status, 404, "only generated names are served");
+  } finally {
+    server.close();
+    delete process.env.UPLOAD_DIR;
+  }
+});
+
+test("a Facebook draft with an image is published as a photo post", async () => {
+  Object.assign(process.env, { META_PAGE_ACCESS_TOKEN: "t", META_PAGE_ID: "555" });
+  const db = openDb(":memory:");
+  db.prepare("INSERT INTO drafts (platform, text, image_url, status) VALUES ('facebook', 'Look', 'https://x.test/media/a.jpg', 'approved')").run();
+  try {
+    await withFetch(() => new Response(JSON.stringify({ id: "photo1", post_id: "555_9" }), { status: 200 }), async (calls) => {
+      assert.equal((await publishDue(db)).published, 1);
+      assert.match(calls[0].url, /\/555\/photos$/);
+      const form = new URLSearchParams(calls[0].init.body);
+      assert.equal(form.get("url"), "https://x.test/media/a.jpg");
+      assert.equal(form.get("caption"), "Look");
+      assert.equal(db.prepare("SELECT external_id FROM drafts").get().external_id, "555_9");
+    });
+  } finally {
+    for (const k of ["META_PAGE_ACCESS_TOKEN", "META_PAGE_ID"]) delete process.env[k];
+  }
+});

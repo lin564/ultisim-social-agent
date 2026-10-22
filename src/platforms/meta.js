@@ -9,12 +9,15 @@ export const facebook = {
   configured: (account) => Boolean(token(account) && cred("META_PAGE_ID", account)),
 
   async publish(draft) {
-    const path = draft.kind === "reply" ? `${draft.target}/comments` : `${cred("META_PAGE_ID", draft.account)}/feed`;
-    const { data } = await request("facebook", `${graph()}/${path}`, {
-      method: "POST",
-      form: { message: draft.text, access_token: token(draft.account) },
-    });
-    return { id: data.id, url: `https://www.facebook.com/${data.id}` };
+    const pageId = cred("META_PAGE_ID", draft.account);
+    // A post with an image goes up as a photo post, so the picture shows in the feed rather than as a link.
+    const withImage = draft.kind !== "reply" && draft.image_url;
+    const path = draft.kind === "reply" ? `${draft.target}/comments` : withImage ? `${pageId}/photos` : `${pageId}/feed`;
+    const form = { message: draft.text, access_token: token(draft.account) };
+    if (withImage) Object.assign(form, { url: draft.image_url, caption: draft.text });
+    const { data } = await request("facebook", `${graph()}/${path}`, { method: "POST", form });
+    const id = data.post_id ?? data.id;
+    return { id, url: `https://www.facebook.com/${id}` };
   },
 
   async fetchMentions(account = "ultisim") {

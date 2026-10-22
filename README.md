@@ -16,7 +16,7 @@ UltiSim's in-house social media manager. It keeps UltiSim, QuestSim, HealthSimAI
 | `report` | Mondays 9:00 | Writes a weekly report: what went out, how it did, what to change, and where each call for papers stands. |
 
 The dashboard (`/`) is where the team works:
-- **Drafts**: edit, schedule, approve, reject, or publish now. The character count follows each platform's limit.
+- **Drafts**: edit, schedule, approve, reject, or publish now. The character count follows each platform's limit. Instagram and Facebook drafts have an **Upload image** button: the photo is converted to JPEG (and padded to Instagram's allowed shapes), stored on the service's disk, and published with the post.
 - **Conferences**: track each call through watching → applying → submitted → accepted. Press "Draft proposal" and Claude reads the call for papers and drafts the title, abstract, learning objectives and bios for you to polish.
 - **Escalations**: mentions that need a person.
 - **Reports** and **System**: platform connection status, run-a-job buttons, and the run log.

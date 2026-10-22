@@ -6,6 +6,7 @@ import { jobs, draftAbstract } from "./jobs/index.js";
 import { publishDue } from "./jobs/publish.js";
 import { platforms } from "./platforms/index.js";
 import { startScheduler } from "./scheduler.js";
+import { saveUpload, readUpload, MAX_UPLOAD_BYTES } from "./media.js";
 
 const PAGE = new URL("../public/index.html", import.meta.url);
 // Public pages the platforms' developer settings link to; no dashboard password needed.
@@ -33,6 +34,24 @@ async function readBody(req) {
     if (raw.length > 1_000_000) throw new Error("Body too large");
   }
   return raw ? JSON.parse(raw) : {};
+}
+
+async function readRaw(req, limit) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > limit) throw new Error("Images must be 8 MB or smaller");
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+// Where the outside world reaches this service, for links platforms fetch (uploaded images).
+function publicBase(req) {
+  const configured = process.env.PUBLIC_URL ?? process.env.RENDER_EXTERNAL_URL;
+  if (configured) return configured.replace(/\/$/, "");
+  return `${req.headers["x-forwarded-proto"] ?? "http"}://${req.headers.host}`;
 }
 
 function pick(obj, keys) {
@@ -71,6 +90,13 @@ export function createApp(db) {
     if ((req.method === "GET" || req.method === "HEAD") && publicPage) {
       return send(200, readFileSync(publicPage), "text/html; charset=utf-8");
     }
+    const media = req.url.match(/^\/media\/([^/?]+)/);
+    if (media && (req.method === "GET" || req.method === "HEAD")) {
+      const file = readUpload(media[1]);
+      if (!file) return send(404, { error: "Not found" });
+      res.writeHead(200, { "Content-Type": file.type, "Content-Length": file.body.length, "Cache-Control": "public, max-age=31536000, immutable" });
+      return res.end(file.body);
+    }
     if (!authorized(req)) {
       res.writeHead(401, { "WWW-Authenticate": 'Basic realm="social-agent"' });
       return res.end();
@@ -81,6 +107,11 @@ export function createApp(db) {
       if (req.method === "GET" && path === "/") return send(200, readFileSync(PAGE), "text/html; charset=utf-8");
       if (req.method === "GET" && path === "/api/state") return send(200, state(db));
       if (req.method !== "POST") return send(404, { error: "Not found" });
+
+      if (path === "/api/uploads") {
+        const name = saveUpload(await readRaw(req, MAX_UPLOAD_BYTES), req.headers["content-type"]?.split(";")[0].trim());
+        return send(200, { url: `${publicBase(req)}/media/${name}` });
+      }
 
       const body = await readBody(req);
       let m;
