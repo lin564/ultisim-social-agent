@@ -243,6 +243,12 @@ async function toJpeg(file, platform) {
   return { blob: await new Promise((ok) => canvas.toBlob(ok, "image/jpeg", 0.9)), padded };
 }
 
+// While a photo picker is open the minute-by-minute refresh must wait: it would replace the draft card,
+// and the photo chosen in the old card's picker would be dropped without a word.
+let pickingSince = 0;
+document.addEventListener("click", (e) => { if (e.target.closest(".upload-btn")) pickingSince = Date.now(); });
+document.addEventListener("cancel", (e) => { if (e.target.matches?.("[data-upload]")) pickingSince = 0; }, true);
+
 document.addEventListener("change", async (e) => {
   const input = e.target.closest("[data-upload]");
   if (!input || !input.files[0]) return;
@@ -263,6 +269,7 @@ document.addEventListener("change", async (e) => {
     note.textContent = `Upload failed: ${err.message}`;
   } finally {
     input.value = "";
+    pickingSince = 0;
   }
 });
 
@@ -502,7 +509,10 @@ document.addEventListener("submit", async (e) => {
 
 window.addEventListener("hashchange", render);
 refresh();
-setInterval(() => { if (!document.querySelector("textarea:focus, input:focus")) refresh(); }, 60000);
+setInterval(() => {
+  const picking = Date.now() - pickingSince < 15 * 60_000;
+  if (!picking && !document.querySelector("textarea:focus, input:focus")) refresh();
+}, 60000);
 </script>
 </body>
 </html>
