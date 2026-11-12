@@ -4,7 +4,7 @@ import { timingSafeEqual } from "node:crypto";
 import { openDb, updateDraft, recordRun, parseJson } from "./db.js";
 import { jobs, draftAbstract } from "./jobs/index.js";
 import { publishDue } from "./jobs/publish.js";
-import { platforms } from "./platforms/index.js";
+import { PLATFORM_NAMES, connectedAccounts } from "./platforms/index.js";
 import { startScheduler } from "./scheduler.js";
 import { saveUpload, readUpload, MAX_UPLOAD_BYTES } from "./media.js";
 import { loadBrand } from "./brand.js";
@@ -60,6 +60,8 @@ function pick(obj, keys) {
 }
 
 function state(db) {
+  const brand = loadBrand();
+  const connected = connectedAccounts(brand);
   return {
     drafts: db.prepare(`SELECT * FROM drafts WHERE status IN ('pending','approved','failed')
       OR (status = 'published' AND updated_at > datetime('now','-14 days')) ORDER BY id DESC LIMIT 200`).all()
@@ -70,10 +72,11 @@ function state(db) {
     escalations: db.prepare("SELECT * FROM mentions WHERE status = 'escalated' ORDER BY id DESC LIMIT 50").all(),
     reports: db.prepare("SELECT * FROM reports ORDER BY id DESC LIMIT 6").all(),
     runs: db.prepare("SELECT id, job, started_at, finished_at, ok, substr(detail, 1, 400) AS detail FROM runs ORDER BY id DESC LIMIT 25").all(),
-    platforms: Object.fromEntries(Object.entries(platforms).map(([n, p]) => [n, p.configured("ultisim")])),
+    // Each platform's connected accounts, e.g. linkedin: ["linda-bernard"]; empty when none has credentials.
+    platforms: Object.fromEntries(PLATFORM_NAMES.map((n) => [n, connected.filter((c) => c.platform === n).map((c) => c.account)])),
     jobs: Object.keys(jobs),
     // Display names and handles for the post previews.
-    accounts: Object.fromEntries(loadBrand().entities.map((e) => [e.id, { name: e.name, handles: e.handles ?? {} }])),
+    accounts: Object.fromEntries(brand.entities.map((e) => [e.id, { name: e.name, handles: e.handles ?? {} }])),
   };
 }
 

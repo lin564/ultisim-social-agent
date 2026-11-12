@@ -191,7 +191,8 @@ function renderReports() {
 }
 
 function renderSystem() {
-  const p = Object.entries(data.platforms).map(([n, ok]) => `<span class="pill ${ok ? "approved" : "failed"}">${n}: ${ok ? "connected" : "no credentials"}</span>`).join(" ");
+  const p = Object.entries(data.platforms).map(([n, ids]) => `<span class="pill ${ids.length ? "approved" : "failed"}">${n}: ${
+    ids.length ? `connected (${esc(ids.map((id) => data.accounts[id]?.name ?? id).join(", "))})` : "no credentials"}</span>`).join(" ");
   return `<div class="card"><strong>Platforms (company account)</strong><div class="meta" style="margin-top:6px">${p}</div></div>
     <div class="card"><strong>Run a job</strong><div class="row">${data.jobs.map((j) => `<button data-job="${j}">${j}</button>`).join("")}</div></div>
     <div class="card"><strong>Recent runs</strong>${data.runs.map((r) => `<details><summary><span class="${r.ok === 1 ? "approved" : r.ok === 0 ? "failed" : "pending"}">${r.ok === 1 ? "ok" : r.ok === 0 ? "failed" : "running"}</span> ${esc(r.job)} · ${esc(r.started_at)}</summary><pre>${esc(r.detail)}</pre></details>`).join("") || '<div class="empty">No runs yet.</div>'}</div>`;
