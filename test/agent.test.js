@@ -99,7 +99,12 @@ test("dashboard requires the password and edits drafts", async () => {
     const state = await (await fetch(`${base}/api/state`, { headers: auth })).json();
     assert.equal(state.drafts.length, 1);
     assert.equal(state.accounts.ultisim.handles.x, "https://x.com/UltisimTeam", "previews show each account's name and handle");
+
+    process.env.LINKEDIN_ACCESS_TOKEN_LINDA_BERNARD = "t";
+    const { platforms } = await (await fetch(`${base}/api/state`, { headers: auth })).json();
+    assert.deepEqual(platforms.linkedin, ["linda-bernard"], "a personal profile counts as connected, not just UltiSim's page");
   } finally {
+    delete process.env.LINKEDIN_ACCESS_TOKEN_LINDA_BERNARD;
     server.close();
   }
 });
