@@ -99,6 +99,9 @@ export function openDb(path = process.env.DB_PATH ?? "data/social-agent.db") {
   const db = new DatabaseSync(path);
   db.exec("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;");
   db.exec(SCHEMA);
+  // Columns added after the first deploy; databases created before then get them here.
+  const metricCols = db.prepare("PRAGMA table_info(metrics)").all().map((c) => c.name);
+  for (const col of ["reach", "saves"]) if (!metricCols.includes(col)) db.exec(`ALTER TABLE metrics ADD COLUMN ${col} INTEGER`);
   return db;
 }
 

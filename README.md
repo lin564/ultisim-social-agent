@@ -12,7 +12,7 @@ UltiSim's in-house social media manager. It keeps UltiSim, QuestSim, HealthSimAI
 | `mentions` | Every 2 h | Pulls mentions and comments from X, Facebook and Reddit, then triages them. It drafts a reply, ignores spam, or escalates to a person (complaints, press, sales leads). |
 | `conferences` | Mondays 5:00 | Finds conferences where Richard, Linda and Bob should present, with call-for-papers deadlines taken from the official sites. |
 | `reminders` | Daily 8:00 | Sends a Slack reminder 30, 14, 7, 3 and 1 days before each proposal deadline we haven't submitted to. Deadlines that pass are marked missed. |
-| `metrics` | Daily 4:00 | Snapshots engagement on recent posts where the platform's API exposes it (X, Facebook). |
+| `metrics` | Daily 4:00 | Snapshots engagement on recent posts where the platform's API exposes it (X, Facebook, Instagram). Each published draft shows its latest stats. See [docs/SETUP.md](docs/SETUP.md#7-post-stats). |
 | `report` | Mondays 9:00 | Writes a weekly report: what went out, how it did, what to change, and where each call for papers stands. |
 
 The dashboard (`/`) is where the team works:

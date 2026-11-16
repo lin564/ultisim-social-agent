@@ -4,6 +4,28 @@ import { request, cred } from "./http.js";
 const graph = () => `https://graph.facebook.com/${process.env.META_GRAPH_VERSION ?? "v23.0"}`;
 const token = (account) => cred("META_PAGE_ACCESS_TOKEN", account);
 
+/**
+ * Reads one insights metric for a post or media item, or null when Meta has no value for it. Metrics are asked for
+ * one at a time because Meta rejects a whole request over one metric it has retired or that the token can't read.
+ * Missing permissions are collected in `denied` so the run log can say which one to add.
+ */
+async function insight(id, metric, account, denied) {
+  try {
+    const { data } = await request("meta", `${graph()}/${id}/insights?metric=${metric}&access_token=${token(account)}`);
+    const row = data.data?.[0];
+    const value = row?.total_value?.value ?? row?.values?.[0]?.value;
+    // Some metrics come back split (e.g. organic and paid); add the parts up.
+    if (value && typeof value === "object") return Object.values(value).reduce((a, b) => a + (Number(b) || 0), 0);
+    return typeof value === "number" ? value : null;
+  } catch (err) {
+    if (/\(#10\)|\(#200\)|permission/i.test(err.message)) denied.add(metric);
+    return null;
+  }
+}
+
+const deniedWarning = (denied, permission) =>
+  denied.size ? `Meta wouldn't share ${[...denied].join(", ")}: add the ${permission} permission to the Page token (docs/SETUP.md, "Post stats")` : null;
+
 export const facebook = {
   name: "facebook",
   configured: (account) => Boolean(token(account) && cred("META_PAGE_ID", account)),
@@ -31,17 +53,21 @@ export const facebook = {
   },
 
   async fetchMetrics(ids, account = "ultisim") {
-    const out = {};
+    const stats = {};
+    const denied = new Set();
     for (const id of ids) {
       const url = `${graph()}/${id}?fields=reactions.summary(total_count),comments.summary(total_count),shares&access_token=${token(account)}`;
       const { data } = await request("facebook", url);
-      out[id] = {
+      stats[id] = {
         likes: data.reactions?.summary?.total_count ?? 0,
         comments: data.comments?.summary?.total_count ?? 0,
         shares: data.shares?.count ?? 0,
+        // Views and reach need the read_insights permission.
+        impressions: await insight(id, "post_media_view", account, denied),
+        reach: await insight(id, "post_total_media_view_unique", account, denied),
       };
     }
-    return out;
+    return { stats, warning: deniedWarning(denied, "read_insights") };
   },
 };
 
@@ -66,5 +92,23 @@ export const instagram = {
     });
     const { data: media } = await request("instagram", `${graph()}/${data.id}?fields=permalink&access_token=${token(draft.account)}`);
     return { id: data.id, url: media.permalink };
+  },
+
+  async fetchMetrics(ids, account = "ultisim") {
+    const stats = {};
+    const denied = new Set();
+    for (const id of ids) {
+      const { data } = await request("instagram", `${graph()}/${id}?fields=like_count,comments_count&access_token=${token(account)}`);
+      stats[id] = {
+        likes: data.like_count ?? 0,
+        comments: data.comments_count ?? 0,
+        // Views, reach, saves and shares need the instagram_manage_insights permission.
+        impressions: await insight(id, "views", account, denied),
+        reach: await insight(id, "reach", account, denied),
+        saves: await insight(id, "saved", account, denied),
+        shares: await insight(id, "shares", account, denied),
+      };
+    }
+    return { stats, warning: deniedWarning(denied, "instagram_manage_insights") };
   },
 };

@@ -63,8 +63,11 @@ function state(db) {
   const brand = loadBrand();
   const connected = connectedAccounts(brand);
   return {
-    drafts: db.prepare(`SELECT * FROM drafts WHERE status IN ('pending','approved','failed')
-      OR (status = 'published' AND updated_at > datetime('now','-14 days')) ORDER BY id DESC LIMIT 200`).all()
+    drafts: db.prepare(`SELECT d.*, m.captured_at AS stats_at, m.impressions AS stat_views, m.reach AS stat_reach,
+        m.likes AS stat_likes, m.comments AS stat_comments, m.shares AS stat_shares, m.saves AS stat_saves
+      FROM drafts d LEFT JOIN metrics m ON m.id = (SELECT max(id) FROM metrics WHERE draft_id = d.id)
+      WHERE d.status IN ('pending','approved','failed')
+      OR (d.status = 'published' AND d.updated_at > datetime('now','-30 days')) ORDER BY d.id DESC LIMIT 200`).all()
       .map((d) => ({ ...d, sources: parseJson(d.sources) })),
     conferences: db.prepare(`SELECT * FROM conferences ORDER BY
       CASE status WHEN 'applying' THEN 0 WHEN 'watching' THEN 1 WHEN 'submitted' THEN 2 WHEN 'accepted' THEN 3 ELSE 4 END,

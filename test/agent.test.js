@@ -8,6 +8,7 @@ import { connectedAccounts } from "../src/platforms/index.js";
 import { loadBrand } from "../src/brand.js";
 import { oauthHeader } from "../src/platforms/x.js";
 import { checkMentions } from "../src/jobs/mentions.js";
+import { collectMetrics } from "../src/jobs/report.js";
 
 delete process.env.SLACK_WEBHOOK_URL;
 
@@ -296,5 +297,34 @@ test("a Facebook draft with an image is published as a photo post", async () => 
     });
   } finally {
     for (const k of ["META_PAGE_ACCESS_TOKEN", "META_PAGE_ID"]) delete process.env[k];
+  }
+});
+
+test("Instagram and Facebook stats include insights, and say which permission is missing", async () => {
+  Object.assign(process.env, { META_PAGE_ACCESS_TOKEN: "t", META_PAGE_ID: "555", INSTAGRAM_USER_ID: "17" });
+  const db = openDb(":memory:");
+  db.prepare("INSERT INTO drafts (platform, text, status, external_id) VALUES ('instagram', 'a', 'published', 'ig1'), ('facebook', 'b', 'published', '555_9')").run();
+  const json = (body, status = 200) => new Response(JSON.stringify(body), { status });
+  try {
+    await withFetch((url) => {
+      const u = new URL(url);
+      const metric = u.searchParams.get("metric");
+      if (u.pathname.endsWith("/ig1")) return json({ like_count: 12, comments_count: 3 });
+      if (u.pathname.endsWith("/ig1/insights")) return json({ data: [{ name: metric, values: [{ value: { views: 900, reach: 640, saved: 4, shares: 2 }[metric] }] }] });
+      if (u.pathname.endsWith("/555_9")) return json({ reactions: { summary: { total_count: 7 } }, comments: { summary: { total_count: 1 } } });
+      // The Facebook token has no read_insights yet.
+      return json({ error: { message: "(#10) Requires read_insights permission" } }, 400);
+    }, async () => {
+      const { captured, errors } = await collectMetrics(db);
+      assert.equal(captured, 2);
+      assert.equal(errors.length, 1);
+      assert.match(errors[0], /facebook.*read_insights/);
+    });
+    const ig = db.prepare("SELECT impressions, reach, likes, comments, shares, saves FROM metrics m JOIN drafts d ON d.id = m.draft_id WHERE d.platform = 'instagram'").get();
+    assert.deepEqual({ ...ig }, { impressions: 900, reach: 640, likes: 12, comments: 3, shares: 2, saves: 4 });
+    const fb = db.prepare("SELECT impressions, reach, likes, comments, shares FROM metrics m JOIN drafts d ON d.id = m.draft_id WHERE d.platform = 'facebook'").get();
+    assert.deepEqual({ ...fb }, { impressions: null, reach: null, likes: 7, comments: 1, shares: 0 }, "basic counts still recorded without insights");
+  } finally {
+    for (const k of ["META_PAGE_ACCESS_TOKEN", "META_PAGE_ID", "INSTAGRAM_USER_ID"]) delete process.env[k];
   }
 });
