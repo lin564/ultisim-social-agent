@@ -45,6 +45,8 @@
   .filters button.on { border-color: var(--accent); color: var(--accent); }
   .due-soon { color: var(--bad); font-weight: 600; }
   a { color: var(--accent); overflow-wrap: anywhere; }
+  .stats { font-size: 14px; margin-top: 8px; padding: 8px 10px; border-radius: 6px; background: var(--bg); }
+  .stats b { font-weight: 600; } .stats .note { margin-top: 2px; }
   .imgcheck { font-size: 13px; margin-top: 4px; }
   .imgcheck.ok { color: var(--ok); } .imgcheck.bad { color: var(--bad); font-weight: 600; }
   .modal-back { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px; overflow-y: auto; z-index: 10; }
@@ -123,12 +125,29 @@ function draftCard(d) {
       <pre>${esc(d.rationale)}</pre>${d.sources.map((s) => `<div>${link(s)}</div>`).join("")}
     </details>
     ${d.error ? `<div class="failed" style="margin-top:6px">${esc(d.error)}</div>` : ""}
+    ${d.status === "published" ? statsLine(d) : ""}
     <div class="row" style="flex:none;justify-content:flex-end">
       <button data-a="preview">Preview</button>
       ${editable ? `<button data-a="reject">Reject</button><button data-a="save">Save</button><button data-a="approve" class="primary">Approve</button><button data-a="publish">Publish now</button>` : ""}
       ${d.status === "approved" ? `<button data-a="reopen">Back to review</button><button data-a="publish">Publish now</button>` : ""}
     </div>
   </div>`;
+}
+
+// Platforms whose post stats the agent collects; the others keep their numbers on the platform itself.
+const STATS_PLATFORMS = new Set(["x", "facebook", "instagram"]);
+
+function statsLine(d) {
+  if (!STATS_PLATFORMS.has(d.platform)) {
+    return `<div class="stats note">Stats for ${esc(d.platform)} posts aren't collected here; ${d.external_url ? link(d.external_url, "see them on the post") : "see them on the platform"}.</div>`;
+  }
+  if (!d.stats_at) return `<div class="stats note">No stats yet. They're collected every night, or press <b>metrics</b> on the System page.</div>`;
+  const parts = [["stat_views", "view"], ["stat_reach", "reached", true], ["stat_likes", "like"], ["stat_comments", "comment"],
+    ["stat_shares", "share"], ["stat_saves", "save"]]
+    .filter(([k]) => d[k] != null)
+    .map(([k, word, fixed]) => `<b>${d[k].toLocaleString()}</b> ${fixed ? word : d[k] === 1 ? word : word + "s"}`);
+  const when = new Date(d.stats_at.replace(" ", "T") + "Z").toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return `<div class="stats">${parts.join(" · ")}<div class="note">Updated ${esc(when)}</div></div>`;
 }
 
 function toLocalInput(utc) {

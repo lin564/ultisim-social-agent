@@ -8,7 +8,7 @@ import { notify, dashboardLink } from "../notify.js";
 export async function collectMetrics(db) {
   const posts = db.prepare(`SELECT id, platform, account, external_id FROM drafts
     WHERE status = 'published' AND external_id IS NOT NULL AND updated_at > datetime('now', '-30 days')`).all();
-  const insert = db.prepare("INSERT INTO metrics (draft_id, impressions, likes, comments, shares, clicks) VALUES (?, ?, ?, ?, ?, ?)");
+  const insert = db.prepare("INSERT INTO metrics (draft_id, impressions, reach, likes, comments, shares, saves, clicks) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
   const groups = Map.groupBy(posts, (p) => `${p.platform}|${p.account}`);
   let captured = 0;
   const errors = [];
@@ -17,11 +17,14 @@ export async function collectMetrics(db) {
     const platform = platforms[name];
     if (!platform.fetchMetrics) continue;
     try {
-      const stats = await platform.fetchMetrics(group.map((p) => p.external_id), account);
+      // Adapters return either the stats by post id, or { stats, warning } when some numbers were unavailable.
+      const result = await platform.fetchMetrics(group.map((p) => p.external_id), account);
+      const stats = result.stats ?? result;
+      if (result.warning) errors.push(`${name} (${account}): ${result.warning}`);
       for (const p of group) {
         const s = stats[p.external_id];
         if (!s) continue;
-        insert.run(p.id, s.impressions ?? null, s.likes ?? null, s.comments ?? null, s.shares ?? null, s.clicks ?? null);
+        insert.run(p.id, s.impressions ?? null, s.reach ?? null, s.likes ?? null, s.comments ?? null, s.shares ?? null, s.saves ?? null, s.clicks ?? null);
         captured++;
       }
     } catch (err) {
@@ -42,7 +45,7 @@ const ReportSchema = z.object({
 /** Weekly performance report: what went out, how it did, what to change, and where we stand on calls for papers. */
 export async function weeklyReport(db, { days = 7 } = {}) {
   const posts = db.prepare(`SELECT d.id, d.platform, d.account, d.pillar, substr(d.text, 1, 280) AS text, d.external_url, d.updated_at AS published,
-      m.impressions, m.likes, m.comments, m.shares
+      m.impressions, m.reach, m.likes, m.comments, m.shares, m.saves
     FROM drafts d LEFT JOIN metrics m ON m.id = (SELECT max(id) FROM metrics WHERE draft_id = d.id)
     WHERE d.status = 'published' AND d.updated_at > datetime('now', ?)`).all(`-${days} days`);
   const pipeline = db.prepare("SELECT status, count(*) AS n FROM drafts WHERE created_at > datetime('now', ?) GROUP BY status").all(`-${days} days`);

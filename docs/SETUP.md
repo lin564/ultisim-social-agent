@@ -26,6 +26,7 @@ Do this as a person who is an admin of both the UltiSim and QuestSim Facebook Pa
    - `pages_manage_posts`
    - `pages_read_user_content`, so the agent can read comments
    - `pages_manage_engagement`, so approved replies can be posted
+   - `read_insights`, so the agent can read each post's views and reach (see section 7)
 
    When Facebook asks which Pages to allow, select both **UltiSim** and **QuestSim**.
 3. Copy the token from the Explorer and paste it into the [Access Token Debugger](https://developers.facebook.com/tools/debug/accesstoken/). Click **Extend Access Token** and copy the long-lived token it gives you.
@@ -140,3 +141,28 @@ X's API is billed per request from credits you buy in advance. At a few posts a 
 
 These keys don't expire. If you ever regenerate them in the X console, update Render too.
 
+## 7. Post stats
+
+Every night at 4:00 the agent collects stats on posts from the last 30 days. They appear on each published draft and in the Monday report. To collect them right away, press **metrics** on the System page.
+
+| Platform | Collected | Needs |
+|---|---|---|
+| X | views, likes, replies, reposts | nothing extra |
+| Facebook | likes, comments, shares | nothing extra |
+| Facebook | views and reach | `read_insights` |
+| Instagram | likes, comments | nothing extra |
+| Instagram | views, reach, saves, shares | `instagram_manage_insights` |
+| LinkedIn | not collected | see stats on LinkedIn |
+
+If the agent can't get a number, the System page's run log names the permission it needs. To add the two permissions to the Facebook and Instagram tokens:
+
+1. In the [Meta app dashboard](https://developers.facebook.com/apps), open **UltiSim Social Desk → Use cases**.
+   - In the Pages use case, click **Customize** and add `read_insights`.
+   - In the Instagram use case ("API setup with Facebook login"), add `instagram_manage_insights`.
+2. Make new Page tokens the same way as in section 3, steps 2–4, as someone who manages both Pages. In the Graph API Explorer, tick every permission the tokens already have, plus the two new ones:
+   - `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `pages_read_user_content`, `pages_manage_engagement`, `read_insights`
+   - `instagram_basic`, `instagram_content_publish`, `instagram_manage_comments`, `instagram_manage_insights`
+
+   Then extend the token and run `me/accounts?fields=id,name,access_token`.
+3. In Render, under **Environment**, replace `META_PAGE_ACCESS_TOKEN` (UltiSim) and `META_PAGE_ACCESS_TOKEN_QUESTSIM` with the new tokens. The Page and Instagram ids stay the same. Click **Save, rebuild, and deploy**.
+4. On the System page, press **metrics**. The run log should show no permission warnings.
